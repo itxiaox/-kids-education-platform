@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.DS_Store
+env/
+.venv/
+
+# 敏感文件
+api/secrets.json
+api/history.json
+.env

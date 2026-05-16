@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 幼升小教育动画学习平台</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <header class="header">
+            <h1>🎬 幼升小教育动画学习平台</h1>
+            <p class="subtitle">专为3-6岁儿童打造的学习乐园</p>
+        </header>
+
+        <!-- 搜索栏 -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="🔍 搜索视频...">
+            <button onclick="searchVideos()">搜索</button>
+        </div>
+
+        <!-- 统计信息 -->
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-item">
+                <span class="stat-num" id="totalVideos">0</span>
+                <span class="stat-label">视频总数</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num" id="totalSize">0</span>
+                <span class="stat-label">总大小</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-num" id="watchedCount">0</span>
+                <span class="stat-label">已观看</span>
+            </div>
+        </div>
+
+        <!-- 分类导航 -->
+        <nav class="category-nav" id="categoryNav">
+            <button class="cat-btn active" data-category="all" onclick="switchCategory('all')">
+                📚 全部
+            </button>
+            <button class="cat-btn" data-category="math" onclick="switchCategory('math')">
+                📐 数学
+            </button>
+            <button class="cat-btn" data-category="english" onclick="switchCategory('english')">
+                🔤 英语
+            </button>
+            <button class="cat-btn" data-category="pinyin" onclick="switchCategory('pinyin')">
+                🅰️ 拼音
+            </button>
+            <button class="cat-btn" data-category="science" onclick="switchCategory('science')">
+                🔬 科学
+            </button>
+        </nav>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 视频播放器 -->
+            <div class="player-section" id="playerSection" style="display: none;">
+                <div class="player-header">
+                    <h2 id="currentVideoName">正在加载...</h2>
+                    <button class="close-btn" onclick="closePlayer()">×</button>
+                </div>
+                <video id="videoPlayer" controls autoplay>
+                    您的浏览器不支持视频播放
+                </video>
+                <div class="player-info" id="playerInfo"></div>
+            </div>
+
+            <!-- 视频列表 -->
+            <div class="video-list" id="videoList">
+                <div class="loading">加载中...</div>
+            </div>
+
+            <!-- 播放历史 -->
+            <div class="history-section" id="historySection">
+                <div class="section-header">
+                    <h3>📝 播放历史</h3>
+                    <button class="clear-btn" onclick="clearHistory()">清空</button>
+                </div>
+                <div class="history-list" id="historyList">
+                    <div class="empty-tip">暂无播放记录</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部 -->
+        <footer class="footer">
+            <p>🎓 让孩子在快乐中学习成长</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
