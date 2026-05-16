@@ -17,7 +17,9 @@ def run_command(cmd, cwd=None):
             check=True,
             capture_output=True,
             text=True,
-            shell=True
+            shell=True,
+            encoding='utf-8',
+            errors='replace'
         )
         return {"success": True, "stdout": result.stdout, "stderr": result.stderr}
     except subprocess.CalledProcessError as e:
