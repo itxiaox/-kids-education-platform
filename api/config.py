@@ -18,5 +18,7 @@ VIDEO_CATEGORIES = {
 }
 
 # Flask配置
-FLASK_HOST = os.environ.get('FLASK_HOST', '0.0.0.0')
-FLASK_PORT = int(os.environ.get('FLASK_PORT', 5000))
+API_HOST = os.environ.get('FLASK_HOST', '0.0.0.0')
+API_PORT = int(os.environ.get('FLASK_PORT', 5000))
+STATIC_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'web')
+HISTORY_FILE = os.path.join(os.path.dirname(__file__), 'history.json')

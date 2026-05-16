@@ -120,39 +120,42 @@ async function playVideo(key, name, category) {
     try {
         // 去掉key中的video/前缀，因为API会自动添加
         const videoKey = key.replace(/^video\//, '');
-        
+
         // 获取签名URL
         const response = await fetch(`${API_BASE}/api/video/${videoKey}`);
         const result = await response.json();
-        
+
         if (result.code === 0) {
             currentPlaying = { key, name, category };
-            
+
             // 显示播放器
             const playerSection = document.getElementById('playerSection');
             const videoPlayer = document.getElementById('videoPlayer');
             const currentVideoName = document.getElementById('currentVideoName');
             const playerInfo = document.getElementById('playerInfo');
-            
+
             playerSection.style.display = 'block';
             currentVideoName.textContent = name;
             videoPlayer.src = result.data.url;
-            
+
             playerInfo.innerHTML = `
-                <span>📂 分类: ${getCategoryName(category)}</span> | 
+                <span>📂 分类: ${getCategoryName(category)}</span> |
                 <span>🔗 链接有效期: ${result.data.expires_in}</span>
             `;
-            
+
             // 记录播放
             recordHistory(name, key, category);
-            
+
             // 滚动到播放器
             playerSection.scrollIntoView({ behavior: 'smooth' });
-            
+
             // 监听播放结束
             videoPlayer.onended = () => {
                 updateHistoryDuration(key, Math.round(videoPlayer.duration));
             };
+        } else if (result.code === 200 && result.message === 'demo_mode') {
+            // 演示模式提示
+            showError('演示模式：视频链接不可用。请配置COS凭证以获取真实视频。\n\n当前为演示数据，实际视频需要配置腾讯云COS。');
         } else {
             showError('获取视频链接失败');
         }

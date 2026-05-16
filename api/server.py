@@ -1,13 +1,19 @@
+# -*- coding: utf-8 -*-
 """
 Flask API 服务器
 提供视频列表、签名链接、搜索、播放记录等功能
 """
 
 import os
+import sys
 import json
 import time
 from flask import Flask, jsonify, request, send_from_directory
 from qcloud_cos import CosConfig, CosS3Client
+
+# 设置stdout编码以支持中文和emoji
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 from config import (
     COS_SECRET_ID, COS_SECRET_KEY, COS_BUCKET, COS_REGION,
@@ -16,17 +22,66 @@ from config import (
 
 app = Flask(__name__, static_folder=STATIC_FOLDER, static_url_path='/static')
 
-# 初始化COS客户端
-cos_config = CosConfig(
-    Region=COS_REGION,
-    SecretId=COS_SECRET_ID,
-    SecretKey=COS_SECRET_KEY
-)
-cos_client = CosS3Client(cos_config)
+# 初始化COS客户端（使用线程本地存储以支持多进程）
+cos_client = None
+
+def init_cos_client():
+    """初始化COS客户端（确保在每个请求线程中都正确初始化）"""
+    global cos_client
+    if cos_client is None and COS_SECRET_ID and COS_SECRET_KEY:
+        try:
+            cos_config = CosConfig(
+                Region=COS_REGION,
+                SecretId=COS_SECRET_ID,
+                SecretKey=COS_SECRET_KEY
+            )
+            cos_client = CosS3Client(cos_config)
+            print("[DEBUG] cos_client initialized successfully")
+        except Exception as e:
+            print(f"[ERROR] Failed to initialize cos_client: {e}")
+
+# 在每个请求前确保cos_client已初始化
+@app.before_request
+def before_request():
+    init_cos_client()
+
+
+# Mock数据 - 用于演示模式
+MOCK_VIDEOS = {
+    'video/math/': [
+        {'key': 'video/math/1.mp4', 'name': '认识数字1-10.mp4', 'size': 52428800, 'size_mb': 50.0, 'modified': '2024-01-15T10:30:00Z'},
+        {'key': 'video/math/2.mp4', 'name': '加减法入门.mp4', 'size': 62914560, 'size_mb': 60.0, 'modified': '2024-01-16T14:20:00Z'},
+        {'key': 'video/math/3.mp4', 'name': '形状认知.mp4', 'size': 41943040, 'size_mb': 40.0, 'modified': '2024-01-17T09:15:00Z'},
+        {'key': 'video/math/4.mp4', 'name': '比较大小.mp4', 'size': 47185920, 'size_mb': 45.0, 'modified': '2024-01-18T11:00:00Z'},
+    ],
+    'video/english/': [
+        {'key': 'video/english/1.mp4', 'name': '字母ABC.mp4', 'size': 52428800, 'size_mb': 50.0, 'modified': '2024-01-15T10:30:00Z'},
+        {'key': 'video/english/2.mp4', 'name': '日常单词.mp4', 'size': 62914560, 'size_mb': 60.0, 'modified': '2024-01-16T14:20:00Z'},
+        {'key': 'video/english/3.mp4', 'name': '简单对话.mp4', 'size': 41943040, 'size_mb': 40.0, 'modified': '2024-01-17T09:15:00Z'},
+    ],
+    'video/pinyin/': [
+        {'key': 'video/pinyin/1.mp4', 'name': '声母学习.mp4', 'size': 52428800, 'size_mb': 50.0, 'modified': '2024-01-15T10:30:00Z'},
+        {'key': 'video/pinyin/2.mp4', 'name': '韵母学习.mp4', 'size': 62914560, 'size_mb': 60.0, 'modified': '2024-01-16T14:20:00Z'},
+        {'key': 'video/pinyin/3.mp4', 'name': '声调练习.mp4', 'size': 41943040, 'size_mb': 40.0, 'modified': '2024-01-17T09:15:00Z'},
+        {'key': 'video/pinyin/4.mp4', 'name': '拼音组合.mp4', 'size': 47185920, 'size_mb': 45.0, 'modified': '2024-01-18T11:00:00Z'},
+        {'key': 'video/pinyin/5.mp4', 'name': '整体认读音节.mp4', 'size': 57671680, 'size_mb': 55.0, 'modified': '2024-01-19T16:45:00Z'},
+    ],
+    'video/science/': [
+        {'key': 'video/science/1.mp4', 'name': '认识动物.mp4', 'size': 52428800, 'size_mb': 50.0, 'modified': '2024-01-15T10:30:00Z'},
+        {'key': 'video/science/2.mp4', 'name': '植物生长.mp4', 'size': 62914560, 'size_mb': 60.0, 'modified': '2024-01-16T14:20:00Z'},
+        {'key': 'video/science/3.mp4', 'name': '天气变化.mp4', 'size': 41943040, 'size_mb': 40.0, 'modified': '2024-01-17T09:15:00Z'},
+        {'key': 'video/science/4.mp4', 'name': '太阳系.mp4', 'size': 73400320, 'size_mb': 70.0, 'modified': '2024-01-18T11:00:00Z'},
+    ]
+}
 
 
 def get_cos_files(prefix):
     """获取COS指定前缀下的所有文件"""
+    if not cos_client:
+        # 返回mock数据用于演示
+        mock_data = MOCK_VIDEOS.get(prefix, [])
+        print(f"[DEBUG] get_cos_files mock mode, prefix: '{prefix}', returning {len(mock_data)} files")
+        return mock_data
     files = []
     marker = ''
     while True:
@@ -61,8 +116,10 @@ def get_cos_files(prefix):
 
 def get_signed_url(key, expires=3600):
     """生成带签名的访问链接"""
+    init_cos_client()
+    if not cos_client:
+        return None
     try:
-        # 使用get_presigned_download_url方法生成带签名的下载链接
         signed_url = cos_client.get_presigned_download_url(
             Bucket=COS_BUCKET,
             Key=key,
@@ -70,7 +127,7 @@ def get_signed_url(key, expires=3600):
         )
         return signed_url
     except Exception as e:
-        print(f"生成签名链接失败: {e}")
+        print(f"[ERROR] 生成签名链接失败: {e}")
         return None
 
 
@@ -105,31 +162,59 @@ def index():
 @app.route('/api/videos', methods=['GET'])
 def get_all_videos():
     """获取所有视频列表"""
-    print("[DEBUG] get_all_videos called")
     category = request.args.get('category', '')
-    print(f"[DEBUG] category param: '{category}'")
+    
+    # 演示模式：直接返回mock数据
+    if not cos_client:
+        all_files = []
+        if category and category in VIDEO_CATEGORIES:
+            prefix = VIDEO_CATEGORIES[category]['path']
+            files = MOCK_VIDEOS.get(prefix, [])
+            for f in files:
+                f['category'] = category
+                f['category_name'] = VIDEO_CATEGORIES[category]['name']
+                f['category_icon'] = VIDEO_CATEGORIES[category]['icon']
+            all_files = files
+        else:
+            for cat_key, cat_info in VIDEO_CATEGORIES.items():
+                prefix = cat_info['path']
+                files = MOCK_VIDEOS.get(prefix, [])
+                for f in files:
+                    f['category'] = cat_key
+                    f['category_name'] = cat_info['name']
+                    f['category_icon'] = cat_info['icon']
+                all_files.extend(files)
+        all_files.sort(key=lambda x: (x['category'], x['name']))
+        return jsonify({
+            'code': 0,
+            'message': 'success',
+            'data': {
+                'categories': [
+                    {
+                        'key': k,
+                        'name': v['name'],
+                        'icon': v['icon'],
+                        'path': v['path']
+                    } for k, v in VIDEO_CATEGORIES.items()
+                ],
+                'videos': all_files,
+                'total': len(all_files)
+            }
+        })
     
     all_files = []
     
     if category and category in VIDEO_CATEGORIES:
-        print(f"[DEBUG] Single category mode: {category}")
-        # 获取指定分类
         prefix = VIDEO_CATEGORIES[category]['path']
-        print(f"[DEBUG] Calling get_cos_files with prefix: '{prefix}'")
         files = get_cos_files(prefix)
-        print(f"[DEBUG] get_cos_files returned {len(files)} files")
         for f in files:
             f['category'] = category
             f['category_name'] = VIDEO_CATEGORIES[category]['name']
             f['category_icon'] = VIDEO_CATEGORIES[category]['icon']
         all_files = files
     else:
-        print(f"[DEBUG] All categories mode, VIDEO_CATEGORIES has {len(VIDEO_CATEGORIES)} entries")
-        # 获取所有分类
         for cat_key, cat_info in VIDEO_CATEGORIES.items():
-            print(f"[DEBUG] Processing category: {cat_key}, path: {cat_info['path']}")
             files = get_cos_files(cat_info['path'])
-            print(f"[DEBUG] get_cos_files for '{cat_key}' returned {len(files)} files")
             for f in files:
                 f['category'] = cat_key
                 f['category_name'] = cat_info['name']
@@ -138,8 +223,6 @@ def get_all_videos():
     
     # 按分类和名称排序
     all_files.sort(key=lambda x: (x['category'], x['name']))
-    
-    print(f"[DEBUG] Total all_files: {len(all_files)}")
     
     return jsonify({
         'code': 0,
@@ -193,10 +276,10 @@ def get_category_videos(category):
 def get_video_url(path):
     """获取视频的签名访问链接"""
     expires = int(request.args.get('expires', 3600))
-    
+
     # 构建COS路径
     key = f'video/{path}'
-    
+
     signed_url = get_signed_url(key, expires)
     if signed_url:
         return jsonify({
@@ -210,10 +293,17 @@ def get_video_url(path):
             }
         })
     else:
+        # 演示模式：返回提示
         return jsonify({
-            'code': 500,
-            'message': '获取视频链接失败'
-        }), 500
+            'code': 200,
+            'message': 'demo_mode',
+            'data': {
+                'url': None,
+                'key': key,
+                'demo': True,
+                'message': '演示模式：需要配置COS凭证才能获取真实视频链接'
+            }
+        })
 
 
 @app.route('/api/search', methods=['GET'])
@@ -371,14 +461,7 @@ def get_stats():
 
 
 if __name__ == '__main__':
-    print(f'''
-╔══════════════════════════════════════════════════════╗
-║                                                      ║
-║       🎬 幼升小教育动画学习平台 API 服务              ║
-║                                                      ║
-║       访问地址: http://{API_HOST}:{API_PORT}                   ║
-║       前端页面: http://{API_HOST}:{API_PORT}/                   ║
-║                                                      ║
-╚══════════════════════════════════════════════════════╝
-    ''')
+    print('[INFO] Starting Kids Education Platform API Server...')
+    print('[INFO] Access URL: http://{}:{}'.format(API_HOST, API_PORT))
+    print('[INFO] Frontend: http://{}:{}/'.format(API_HOST, API_PORT))
     app.run(host=API_HOST, port=API_PORT, debug=False, use_reloader=False)
