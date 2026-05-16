@@ -4,7 +4,10 @@ __pycache__/
 env/
 .venv/
 
-# 敏感文件
+# 敏感文件 - 不要提交！
+.env
+.env.local
+.env.*.local
 api/secrets.json
 api/history.json
-.env
+api/hidden_videos.json

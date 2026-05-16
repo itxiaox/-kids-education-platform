@@ -8,6 +8,8 @@ import os
 import sys
 import json
 import time
+import hashlib
+import functools
 from flask import Flask, jsonify, request, send_from_directory
 from qcloud_cos import CosConfig, CosS3Client
 
@@ -22,13 +24,68 @@ from config import (
 
 app = Flask(__name__, static_folder=STATIC_FOLDER, static_url_path='/static')
 
+# 管理员配置
+ADMIN_USERS = {
+    'admin': hashlib.md5('admin123'.encode()).hexdigest()  # admin123 的MD5
+}
+
+# 存储已登录的token
+ACTIVE_TOKENS = {}
+
+def generate_token(username):
+    """生成token"""
+    token = hashlib.md5(f"{username}{time.time()}".encode()).hexdigest()
+    ACTIVE_TOKENS[token] = {
+        'username': username,
+        'expires': time.time() + 3600 * 24  # 24小时过期
+    }
+    return token
+
+def validate_token(token):
+    """验证token"""
+    if token not in ACTIVE_TOKENS:
+        return None
+    info = ACTIVE_TOKENS[token]
+    if time.time() > info['expires']:
+        del ACTIVE_TOKENS[token]
+        return None
+    return info['username']
+
+def requires_auth(f):
+    """装饰器：需要管理员认证"""
+    @functools.wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.headers.get('Authorization') or request.args.get('token')
+        if not token:
+            return jsonify({'code': 401, 'message': '未授权访问'}), 401
+        
+        username = validate_token(token)
+        if not username:
+            return jsonify({'code': 401, 'message': 'token无效或已过期'}), 401
+        
+        return f(*args, **kwargs)
+    return decorated
+
 # 初始化COS客户端（使用线程本地存储以支持多进程）
 cos_client = None
 
 def init_cos_client():
     """初始化COS客户端（确保在每个请求线程中都正确初始化）"""
     global cos_client
-    if cos_client is None and COS_SECRET_ID and COS_SECRET_KEY:
+    if cos_client is not None:
+        print(f"[DEBUG] cos_client already initialized")
+        return
+    print(f"[DEBUG] Initializing cos_client...")
+    print(f"[DEBUG] COS_SECRET_ID: {'set' if COS_SECRET_ID else 'NOT SET'}")
+    print(f"[DEBUG] COS_SECRET_KEY: {'set' if COS_SECRET_KEY else 'NOT SET'}")
+    print(f"[DEBUG] COS_BUCKET: {COS_BUCKET}")
+    print(f"[DEBUG] COS_REGION: {COS_REGION}")
+    
+    if not COS_SECRET_ID or not COS_SECRET_KEY:
+        print("[DEBUG] cos_client not initialized - missing credentials")
+        return
+        
+    if cos_client is None:
         try:
             cos_config = CosConfig(
                 Region=COS_REGION,
@@ -37,8 +94,14 @@ def init_cos_client():
             )
             cos_client = CosS3Client(cos_config)
             print("[DEBUG] cos_client initialized successfully")
+            # 测试连接
+            try:
+                cos_client.list_objects(Bucket=COS_BUCKET, Prefix='', MaxKeys=1)
+                print("[DEBUG] COS connection test successful")
+            except Exception as test_e:
+                print(f"[DEBUG] COS connection test failed: {test_e}")
         except Exception as e:
-            print(f"[ERROR] Failed to initialize cos_client: {e}")
+            print(f"[ERROR] Failed to initialize cos_client: {type(e).__name__}: {e}")
 
 # 在每个请求前确保cos_client已初始化
 @app.before_request
@@ -82,18 +145,44 @@ def get_cos_files(prefix):
         mock_data = MOCK_VIDEOS.get(prefix, [])
         print(f"[DEBUG] get_cos_files mock mode, prefix: '{prefix}', returning {len(mock_data)} files")
         return mock_data
+    
+    print(f"[DEBUG] get_cos_files real mode, bucket: '{COS_BUCKET}', prefix: '{prefix}'")
     files = []
     marker = ''
     while True:
         try:
-            response = cos_client.list_objects(
-                Bucket=COS_BUCKET,
-                Prefix=prefix,
-                Marker=marker
-            )
+            # 尝试使用新版SDK的list_objects_v2接口
+            try:
+                response = cos_client.list_objects_v2(
+                    Bucket=COS_BUCKET,
+                    Prefix=prefix,
+                    ContinuationToken=marker if marker else None
+                )
+            except:
+                # 兼容旧版SDK
+                response = cos_client.list_objects(
+                    Bucket=COS_BUCKET,
+                    Prefix=prefix,
+                    Marker=marker
+                )
+            
+            print(f"[DEBUG] COS response keys: {[item['Key'] for item in response.get('Contents', [])]}")
+            
             contents = response.get('Contents', [])
             if not contents:
-                break
+                # 尝试不带末尾斜杠的前缀
+                if prefix.endswith('/'):
+                    alt_prefix = prefix[:-1]
+                    print(f"[DEBUG] No contents with prefix '{prefix}', trying '{alt_prefix}'")
+                    try:
+                        response = cos_client.list_objects_v2(Bucket=COS_BUCKET, Prefix=alt_prefix)
+                        contents = response.get('Contents', [])
+                        print(f"[DEBUG] Alt prefix response keys: {[item['Key'] for item in contents]}")
+                    except:
+                        pass
+                if not contents:
+                    break
+            
             for item in contents:
                 key = item['Key']
                 if not key.endswith('/'):  # 排除目录
@@ -104,13 +193,17 @@ def get_cos_files(prefix):
                         'size_mb': round(int(item['Size']) / (1024 * 1024), 2),
                         'modified': item['LastModified']
                     })
-            if response.get('IsTruncated') == 'true':
-                marker = response.get('NextMarker', '')
+            
+            # 检查分页
+            if response.get('IsTruncated') == 'true' or response.get('NextContinuationToken'):
+                marker = response.get('NextMarker', '') or response.get('NextContinuationToken', '')
             else:
                 break
         except Exception as e:
-            print(f"列出文件失败: {e}")
+            print(f"[ERROR] 列出文件失败: {type(e).__name__}: {e}")
             break
+    
+    print(f"[DEBUG] Found {len(files)} files for prefix '{prefix}'")
     return files
 
 
@@ -161,8 +254,11 @@ def index():
 
 @app.route('/api/videos', methods=['GET'])
 def get_all_videos():
-    """获取所有视频列表"""
+    """获取所有视频列表（过滤隐藏视频）"""
     category = request.args.get('category', '')
+    
+    # 获取隐藏视频列表
+    hidden_list = get_hidden_list()
     
     # 演示模式：直接返回mock数据
     if not cos_client:
@@ -184,6 +280,8 @@ def get_all_videos():
                     f['category_name'] = cat_info['name']
                     f['category_icon'] = cat_info['icon']
                 all_files.extend(files)
+        # 过滤隐藏视频
+        all_files = [f for f in all_files if f['key'] not in hidden_list]
         all_files.sort(key=lambda x: (x['category'], x['name']))
         return jsonify({
             'code': 0,
@@ -220,6 +318,9 @@ def get_all_videos():
                 f['category_name'] = cat_info['name']
                 f['category_icon'] = cat_info['icon']
             all_files.extend(files)
+    
+    # 过滤隐藏视频
+    all_files = [f for f in all_files if f['key'] not in hidden_list]
     
     # 按分类和名称排序
     all_files.sort(key=lambda x: (x['category'], x['name']))
@@ -458,6 +559,286 @@ def get_stats():
             'total_watch_time': watch_time
         }
     })
+
+
+# ==================== 管理员相关API ====================
+
+@app.route('/admin')
+def admin_page():
+    """返回管理页面"""
+    admin_html_path = os.path.join(app.static_folder, 'admin.html')
+    if os.path.exists(admin_html_path):
+        with open(admin_html_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    return 'Admin page not found', 404
+
+@app.route('/api/admin/login', methods=['POST'])
+def admin_login():
+    """管理员登录"""
+    req_data = request.get_json()
+    username = req_data.get('username', '').strip()
+    password = req_data.get('password', '').strip()
+    
+    if not username or not password:
+        return jsonify({
+            'code': 400,
+            'message': '请输入用户名和密码'
+        }), 400
+    
+    # 验证密码
+    expected_hash = ADMIN_USERS.get(username)
+    if not expected_hash:
+        return jsonify({
+            'code': 401,
+            'message': '用户名或密码错误'
+        }), 401
+    
+    password_hash = hashlib.md5(password.encode()).hexdigest()
+    if password_hash != expected_hash:
+        return jsonify({
+            'code': 401,
+            'message': '用户名或密码错误'
+        }), 401
+    
+    # 生成token
+    token = generate_token(username)
+    
+    return jsonify({
+        'code': 0,
+        'message': '登录成功',
+        'data': {
+            'token': token,
+            'username': username,
+            'expires_in': 3600 * 24
+        }
+    })
+
+@app.route('/api/admin/logout', methods=['POST'])
+@requires_auth
+def admin_logout():
+    """管理员登出"""
+    token = request.headers.get('Authorization') or request.args.get('token')
+    if token in ACTIVE_TOKENS:
+        del ACTIVE_TOKENS[token]
+    
+    return jsonify({
+        'code': 0,
+        'message': '登出成功'
+    })
+
+@app.route('/api/admin/check', methods=['GET'])
+def admin_check():
+    """检查登录状态"""
+    token = request.headers.get('Authorization') or request.args.get('token')
+    username = validate_token(token)
+    
+    if username:
+        return jsonify({
+            'code': 0,
+            'message': '已登录',
+            'data': {
+                'username': username
+            }
+        })
+    
+    return jsonify({
+        'code': 401,
+        'message': '未登录'
+    }), 401
+
+@app.route('/api/admin/videos', methods=['GET'])
+@requires_auth
+def admin_get_videos():
+    """管理员获取视频列表（包含隐藏状态）"""
+    category = request.args.get('category', '')
+    
+    all_files = []
+    for cat_key, cat_info in VIDEO_CATEGORIES.items():
+        if category and category != cat_key:
+            continue
+        files = get_cos_files(cat_info['path'])
+        for f in files:
+            f['category'] = cat_key
+            f['category_name'] = cat_info['name']
+            f['category_icon'] = cat_info['icon']
+            f['hidden'] = is_video_hidden(f['key'])
+        all_files.extend(files)
+    
+    all_files.sort(key=lambda x: (x['category'], x['name']))
+    
+    return jsonify({
+        'code': 0,
+        'message': 'success',
+        'data': {
+            'videos': all_files,
+            'total': len(all_files)
+        }
+    })
+
+def is_video_hidden(key):
+    """检查视频是否被隐藏"""
+    hidden_file = os.path.join(os.path.dirname(__file__), 'hidden_videos.json')
+    if not os.path.exists(hidden_file):
+        return False
+    
+    try:
+        with open(hidden_file, 'r', encoding='utf-8') as f:
+            hidden = json.load(f)
+        return key in hidden.get('hidden', [])
+    except:
+        return False
+
+def get_hidden_list():
+    """获取所有隐藏视频的key列表"""
+    hidden_file = os.path.join(os.path.dirname(__file__), 'hidden_videos.json')
+    if not os.path.exists(hidden_file):
+        return []
+    
+    try:
+        with open(hidden_file, 'r', encoding='utf-8') as f:
+            hidden = json.load(f)
+        return hidden.get('hidden', [])
+    except:
+        return []
+
+def save_hidden_videos(hidden_list):
+    """保存隐藏视频列表"""
+    hidden_file = os.path.join(os.path.dirname(__file__), 'hidden_videos.json')
+    try:
+        with open(hidden_file, 'w', encoding='utf-8') as f:
+            json.dump({'hidden': hidden_list}, f, ensure_ascii=False)
+        return True
+    except Exception as e:
+        print(f"保存隐藏列表失败: {e}")
+        return False
+
+@app.route('/api/admin/video/hide', methods=['POST'])
+@requires_auth
+def admin_hide_video():
+    """隐藏视频"""
+    req_data = request.get_json()
+    key = req_data.get('key')
+    
+    if not key:
+        return jsonify({
+            'code': 400,
+            'message': '请提供视频key'
+        }), 400
+    
+    hidden_file = os.path.join(os.path.dirname(__file__), 'hidden_videos.json')
+    hidden_list = []
+    
+    if os.path.exists(hidden_file):
+        try:
+            with open(hidden_file, 'r', encoding='utf-8') as f:
+                hidden = json.load(f)
+                hidden_list = hidden.get('hidden', [])
+        except:
+            pass
+    
+    if key not in hidden_list:
+        hidden_list.append(key)
+    
+    if save_hidden_videos(hidden_list):
+        return jsonify({
+            'code': 0,
+            'message': '隐藏成功'
+        })
+    else:
+        return jsonify({
+            'code': 500,
+            'message': '隐藏失败'
+        }), 500
+
+@app.route('/api/admin/video/show', methods=['POST'])
+@requires_auth
+def admin_show_video():
+    """显示视频（取消隐藏）"""
+    req_data = request.get_json()
+    key = req_data.get('key')
+    
+    if not key:
+        return jsonify({
+            'code': 400,
+            'message': '请提供视频key'
+        }), 400
+    
+    hidden_file = os.path.join(os.path.dirname(__file__), 'hidden_videos.json')
+    hidden_list = []
+    
+    if os.path.exists(hidden_file):
+        try:
+            with open(hidden_file, 'r', encoding='utf-8') as f:
+                hidden = json.load(f)
+                hidden_list = hidden.get('hidden', [])
+        except:
+            pass
+    
+    if key in hidden_list:
+        hidden_list.remove(key)
+    
+    if save_hidden_videos(hidden_list):
+        return jsonify({
+            'code': 0,
+            'message': '已显示'
+        })
+    else:
+        return jsonify({
+            'code': 500,
+            'message': '操作失败'
+        }), 500
+
+@app.route('/api/admin/video/delete', methods=['DELETE'])
+@requires_auth
+def admin_delete_video():
+    """删除视频"""
+    key = request.args.get('key')
+    
+    if not key:
+        return jsonify({
+            'code': 400,
+            'message': '请提供视频key'
+        }), 400
+    
+    # 演示模式：不实际删除
+    if not cos_client:
+        return jsonify({
+            'code': 200,
+            'message': 'demo_mode',
+            'data': {
+                'message': '演示模式：不会实际删除视频。在生产环境中，此操作将删除COS上的文件。'
+            }
+        })
+    
+    try:
+        cos_client.delete_object(
+            Bucket=COS_BUCKET,
+            Key=key
+        )
+        
+        # 从隐藏列表中移除
+        hidden_file = os.path.join(os.path.dirname(__file__), 'hidden_videos.json')
+        if os.path.exists(hidden_file):
+            try:
+                with open(hidden_file, 'r', encoding='utf-8') as f:
+                    hidden = json.load(f)
+                    hidden_list = hidden.get('hidden', [])
+                if key in hidden_list:
+                    hidden_list.remove(key)
+                    save_hidden_videos(hidden_list)
+            except:
+                pass
+        
+        return jsonify({
+            'code': 0,
+            'message': '删除成功'
+        })
+    except Exception as e:
+        print(f"删除视频失败: {e}")
+        return jsonify({
+            'code': 500,
+            'message': f'删除失败: {str(e)}'
+        }), 500
 
 
 if __name__ == '__main__':

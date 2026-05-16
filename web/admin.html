@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 后台管理系统</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>⚙️ 管理中心</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" onclick="switchMenu('videos')">
+                    📺 视频管理
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="logout-btn" onclick="handleLogout()">
+                    🚪 退出登录
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部导航 -->
+            <header class="top-bar">
+                <div class="top-left">
+                    <h2 id="pageTitle">📺 视频管理</h2>
+                </div>
+                <div class="top-right">
+                    <span id="userInfo">👤 管理员</span>
+                </div>
+            </header>
+
+            <!-- 视频列表 -->
+            <div class="content-area" id="videoContent">
+                <div class="filter-bar">
+                    <select id="categoryFilter" onchange="filterVideos()">
+                        <option value="">全部分类</option>
+                        <option value="math">📐 数学思维</option>
+                        <option value="english">🔤 英语启蒙</option>
+                        <option value="pinyin">🅰️ 拼音学习</option>
+                        <option value="science">🔬 科学探索</option>
+                    </select>
+                    <select id="statusFilter" onchange="filterVideos()">
+                        <option value="">全部状态</option>
+                        <option value="visible">✅ 显示中</option>
+                        <option value="hidden">❌ 已隐藏</option>
+                    </select>
+                    <input type="text" id="searchInput" placeholder="搜索视频..." onkeyup="filterVideos()">
+                </div>
+
+                <div class="video-table-container">
+                    <table class="video-table">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>图标</th>
+                                <th>视频名称</th>
+                                <th>分类</th>
+                                <th>大小</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="videoTableBody">
+                            <tr><td colspan="7" class="loading">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-icon">📭</div>
+                    <p>暂无符合条件的视频</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>

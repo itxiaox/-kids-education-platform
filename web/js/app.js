@@ -342,3 +342,47 @@ function formatSize(bytes) {
     }
     return mb.toFixed(2) + ' MB';
 }
+
+// 显示登录弹窗
+function showLoginModal() {
+    document.getElementById('loginModal').style.display = 'flex';
+}
+
+// 关闭登录弹窗
+function closeLoginModal() {
+    document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+}
+
+// 处理登录
+async function handleLogin() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    
+    if (!username || !password) {
+        showError('请输入用户名和密码');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/admin/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+        
+        const result = await response.json();
+        
+        if (result.code === 0) {
+            localStorage.setItem('admin_token', result.data.token);
+            closeLoginModal();
+            window.location.href = '/admin';
+        } else {
+            showError(result.message || '登录失败');
+        }
+    } catch (error) {
+        console.error('登录失败:', error);
+        showError('网络错误，请重试');
+    }
+}
