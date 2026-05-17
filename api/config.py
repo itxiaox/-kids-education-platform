@@ -11,10 +11,10 @@ COS_REGION = os.environ.get('COS_REGION', 'ap-shanghai')
 
 # 视频分类
 VIDEO_CATEGORIES = {
-    'math': {'name': '数学思维', 'icon': '📐', 'path': 'video/math/'},
-    'english': {'name': '英语启蒙', 'icon': '🔤', 'path': 'video/english/'},
-    'pinyin': {'name': '拼音学习', 'icon': '🅰️', 'path': 'video/pinyin/'},
-    'science': {'name': '科学探索', 'icon': '🔬', 'path': 'video/science/'},
+    'math': {'name': '数学思维', 'icon': '📐', 'path': 'private/02-learning/videos/math/'},
+    'english': {'name': '英语启蒙', 'icon': '🔤', 'path': 'private/02-learning/videos/english/'},
+    'pinyin': {'name': '拼音学习', 'icon': '🅰️', 'path': 'private/02-learning/videos/pinyin/'},
+    'science': {'name': '科学探索', 'icon': '🔬', 'path': 'private/02-learning/videos/science/'},
 }
 
 # Flask配置

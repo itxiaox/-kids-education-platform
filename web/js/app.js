@@ -118,47 +118,42 @@ function renderVideos() {
 // 播放视频
 async function playVideo(key, name, category) {
     try {
-        // 去掉key中的video/前缀，因为API会自动添加
-        const videoKey = key.replace(/^video\//, '');
+        const videoKey = encodeURIComponent(key);
+        const proxyUrl = `${API_BASE}/api/proxy/video/${videoKey}`;
+        
+        currentPlaying = { key, name, category };
 
-        // 获取签名URL
-        const response = await fetch(`${API_BASE}/api/video/${videoKey}`);
-        const result = await response.json();
+        // 显示播放器
+        const playerSection = document.getElementById('playerSection');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const currentVideoName = document.getElementById('currentVideoName');
+        const playerInfo = document.getElementById('playerInfo');
 
-        if (result.code === 0) {
-            currentPlaying = { key, name, category };
+        playerSection.style.display = 'block';
+        currentVideoName.textContent = name;
+        videoPlayer.src = proxyUrl;
 
-            // 显示播放器
-            const playerSection = document.getElementById('playerSection');
-            const videoPlayer = document.getElementById('videoPlayer');
-            const currentVideoName = document.getElementById('currentVideoName');
-            const playerInfo = document.getElementById('playerInfo');
+        playerInfo.innerHTML = `
+            <span>📂 分类: ${getCategoryName(category)}</span> |
+            <span>🔄 代理模式: 永久访问</span>
+        `;
 
-            playerSection.style.display = 'block';
-            currentVideoName.textContent = name;
-            videoPlayer.src = result.data.url;
+        // 记录播放
+        recordHistory(name, key, category);
 
-            playerInfo.innerHTML = `
-                <span>📂 分类: ${getCategoryName(category)}</span> |
-                <span>🔗 链接有效期: ${result.data.expires_in}</span>
-            `;
+        // 滚动到播放器
+        playerSection.scrollIntoView({ behavior: 'smooth' });
 
-            // 记录播放
-            recordHistory(name, key, category);
+        // 监听播放结束
+        videoPlayer.onended = () => {
+            updateHistoryDuration(key, Math.round(videoPlayer.duration));
+        };
 
-            // 滚动到播放器
-            playerSection.scrollIntoView({ behavior: 'smooth' });
-
-            // 监听播放结束
-            videoPlayer.onended = () => {
-                updateHistoryDuration(key, Math.round(videoPlayer.duration));
-            };
-        } else if (result.code === 200 && result.message === 'demo_mode') {
-            // 演示模式提示
-            showError('演示模式：视频链接不可用。请配置COS凭证以获取真实视频。\n\n当前为演示数据，实际视频需要配置腾讯云COS。');
-        } else {
-            showError('获取视频链接失败');
-        }
+        // 监听视频加载错误
+        videoPlayer.onerror = () => {
+            console.error('视频加载失败:', proxyUrl);
+            showError('视频加载失败，请检查网络连接或视频是否存在');
+        };
     } catch (error) {
         console.error('播放失败:', error);
         showError('播放失败，请重试');

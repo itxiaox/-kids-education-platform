@@ -10,7 +10,7 @@ import json
 import time
 import hashlib
 import functools
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, Response
 from qcloud_cos import CosConfig, CosS3Client
 
 # 设置stdout编码以支持中文和emoji
@@ -222,6 +222,64 @@ def get_signed_url(key, expires=3600):
     except Exception as e:
         print(f"[ERROR] 生成签名链接失败: {e}")
         return None
+
+
+def stream_video_from_cos(key):
+    """从COS流式获取视频内容"""
+    init_cos_client()
+    if not cos_client:
+        return None
+    
+    try:
+        response = cos_client.get_object(
+            Bucket=COS_BUCKET,
+            Key=key,
+        )
+        return response['Body']
+    except Exception as e:
+        print(f"[ERROR] 从COS获取视频失败: {e}")
+        return None
+
+
+@app.route('/api/proxy/video/<path:path>', methods=['GET'])
+def proxy_video(path):
+    """代理转发视频流（永久访问方案）"""
+    key = path
+    
+    if not key.startswith('private/') and not key.startswith('video/'):
+        return jsonify({
+            'code': 400,
+            'message': '无效的视频路径'
+        }), 400
+    
+    video_stream = stream_video_from_cos(key)
+    if not video_stream:
+        return jsonify({
+            'code': 500,
+            'message': '无法获取视频，请检查COS配置'
+        }), 500
+    
+    def generate():
+        try:
+            while True:
+                chunk = video_stream.read(8192)
+                if not chunk:
+                    break
+                yield chunk
+        except Exception as e:
+            print(f"[ERROR] 视频流传输中断: {e}")
+    
+    filename = os.path.basename(key)
+    
+    return Response(
+        generate(),
+        mimetype='video/mp4',
+        headers={
+            'Content-Disposition': f'inline; filename="{filename}"',
+            'Accept-Ranges': 'bytes',
+            'Cache-Control': 'no-cache'
+        }
+    )
 
 
 def load_history():
