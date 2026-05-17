@@ -5,6 +5,33 @@
 let allVideos = [];
 let filteredVideos = [];
 const API_BASE = '';
+const COS_BUCKET = '';
+const COS_REGION = '';
+
+// 生成视频缩略图URL（从COS获取）
+function getThumbnailUrl(videoKey) {
+    if (!COS_BUCKET || !COS_REGION) {
+        return null;
+    }
+    // 缩略图与视频同名，但扩展名为.jpg
+    const thumbnailKey = videoKey.replace(/\.[^.]+$/, '.jpg');
+    return `/api/proxy/thumbnail/${encodeURIComponent(thumbnailKey)}`;
+}
+
+// 格式化时间显示
+function formatDate(dateStr) {
+    if (!dateStr) return '-';
+    try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+    } catch {
+        return dateStr;
+    }
+}
 
 // 获取token
 function getToken() {
@@ -91,18 +118,26 @@ function renderVideos() {
         const icon = categoryIcons[video.category] || '📁';
         const status = video.hidden ? 'hidden' : 'visible';
         const statusText = video.hidden ? '❌ 已隐藏' : '✅ 显示中';
-        
+        const thumbnailUrl = getThumbnailUrl(video.key);
+        const uploadTime = formatDate(video.modified);
+
         html += `
             <tr>
                 <td>${index + 1}</td>
-                <td>${icon}</td>
+                <td>
+                    ${thumbnailUrl ?
+                        `<img src="${thumbnailUrl}" class="video-thumbnail" alt="${video.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">` : ''
+                    }
+                    <span class="thumb-placeholder" style="display:${thumbnailUrl ? 'none' : 'inline'};">${icon}</span>
+                </td>
                 <td title="${video.name}">${truncateText(video.name, 30)}</td>
                 <td>${video.category_name}</td>
                 <td>${video.size_mb} MB</td>
+                <td>${uploadTime}</td>
                 <td><span class="status status-${status}">${statusText}</span></td>
                 <td>
-                    ${video.hidden ? 
-                        `<button class="btn btn-show" onclick="toggleVideoShow('${video.key}')">显示</button>` : 
+                    ${video.hidden ?
+                        `<button class="btn btn-show" onclick="toggleVideoShow('${video.key}')">显示</button>` :
                         `<button class="btn btn-hide" onclick="toggleVideoHide('${video.key}')">隐藏</button>`
                     }
                     <button class="btn btn-delete" onclick="handleDelete('${video.key}', '${video.name}')">删除</button>

@@ -245,20 +245,20 @@ def stream_video_from_cos(key):
 def proxy_video(path):
     """代理转发视频流（永久访问方案）"""
     key = path
-    
+
     if not key.startswith('private/') and not key.startswith('video/'):
         return jsonify({
             'code': 400,
             'message': '无效的视频路径'
         }), 400
-    
+
     video_stream = stream_video_from_cos(key)
     if not video_stream:
         return jsonify({
             'code': 500,
             'message': '无法获取视频，请检查COS配置'
         }), 500
-    
+
     def generate():
         try:
             while True:
@@ -268,7 +268,7 @@ def proxy_video(path):
                 yield chunk
         except Exception as e:
             print(f"[ERROR] 视频流传输中断: {e}")
-    
+
     filename = os.path.basename(key)
 
     return Response(
@@ -280,6 +280,44 @@ def proxy_video(path):
             'Cache-Control': 'no-cache'
         }
     )
+
+
+@app.route('/api/proxy/thumbnail/<path:path>', methods=['GET'])
+def proxy_thumbnail(path):
+    """代理转发缩略图"""
+    key = path
+
+    if not key.startswith('private/') and not key.startswith('video/'):
+        return jsonify({
+            'code': 400,
+            'message': '无效的缩略图路径'
+        }), 400
+
+    init_cos_client()
+    if not cos_client:
+        return jsonify({
+            'code': 500,
+            'message': 'COS未配置'
+        }), 500
+
+    try:
+        response = cos_client.get_object(
+            Bucket=COS_BUCKET,
+            Key=key
+        )
+        return Response(
+            response['Body'].read(),
+            mimetype='image/jpeg',
+            headers={
+                'Cache-Control': 'max-age=86400'
+            }
+        )
+    except Exception as e:
+        print(f"[ERROR] 获取缩略图失败: {e}")
+        return jsonify({
+            'code': 404,
+            'message': '缩略图不存在'
+        }), 404
 
 
 def load_history():
