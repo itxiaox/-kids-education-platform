@@ -5,16 +5,20 @@
 let allVideos = [];
 let filteredVideos = [];
 const API_BASE = '';
-const COS_BUCKET = '';
-const COS_REGION = '';
+const COS_BUCKET = 'itxiaox-1301580359';
+const COS_REGION = 'ap-shanghai';
 
 // 生成视频缩略图URL（从COS获取）
 function getThumbnailUrl(videoKey) {
     if (!COS_BUCKET || !COS_REGION) {
         return null;
     }
-    // 缩略图与视频同名，但扩展名为.jpg
-    const thumbnailKey = videoKey.replace(/\.[^.]+$/, '.jpg');
+    // 缩略图在视频目录的 thumbs 子目录下
+    // 视频: private/02-learning/videos/english/bedtime-stories/video_xxx.mp4
+    // 缩略图: private/02-learning/videos/english/bedtime-stories/thumbs/video_xxx.jpg
+    const videoName = videoKey.split('/').pop().replace(/\.[^.]+$/, '');
+    const dir = videoKey.substring(0, videoKey.lastIndexOf('/'));
+    const thumbnailKey = `${dir}/thumbs/${videoName}.jpg`;
     return `/api/proxy/thumbnail/${encodeURIComponent(thumbnailKey)}`;
 }
 
