@@ -9,17 +9,20 @@ const COS_BUCKET = 'itxiaox-1301580359';
 const COS_REGION = 'ap-shanghai';
 
 // 生成视频缩略图URL（从COS获取）
-function getThumbnailUrl(videoKey) {
+function getThumbnailUrl(video) {
     if (!COS_BUCKET || !COS_REGION) {
         return null;
     }
-    // 缩略图在视频目录的 thumbs 子目录下
-    // 视频: private/02-learning/videos/english/bedtime-stories/video_xxx.mp4
-    // 缩略图: private/02-learning/videos/english/bedtime-stories/thumbs/video_xxx.jpg
+    // 优先使用数据库中的thumbnail_key
+    if (video.thumbnail_key) {
+        return `/api/proxy/thumbnail/${encodeURIComponent(video.thumbnail_key)}`;
+    }
+    // 备用：从视频key推导
+    const videoKey = video.key || video.video_key;
+    if (!videoKey) return null;
     const videoName = videoKey.split('/').pop().replace(/\.[^.]+$/, '');
     const dir = videoKey.substring(0, videoKey.lastIndexOf('/'));
-    const thumbnailKey = `${dir}/thumbs/${videoName}.jpg`;
-    return `/api/proxy/thumbnail/${encodeURIComponent(thumbnailKey)}`;
+    return `/api/proxy/thumbnail/${encodeURIComponent(dir)}/thumbs/${videoName}.jpg`;
 }
 
 // 格式化时间显示
@@ -122,29 +125,29 @@ function renderVideos() {
         const icon = categoryIcons[video.category] || '📁';
         const status = video.hidden ? 'hidden' : 'visible';
         const statusText = video.hidden ? '❌ 已隐藏' : '✅ 显示中';
-        const thumbnailUrl = getThumbnailUrl(video.key);
-        const uploadTime = formatDate(video.modified);
+        const thumbnailUrl = getThumbnailUrl(video);
+        const uploadTime = formatDate(video.upload_time || video.modified);
 
         html += `
             <tr>
                 <td>${index + 1}</td>
                 <td>
                     ${thumbnailUrl ?
-                        `<img src="${thumbnailUrl}" class="video-thumbnail" alt="${video.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">` : ''
+                        `<img src="${thumbnailUrl}" class="video-thumbnail" alt="${video.video_name || video.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">` : ''
                     }
                     <span class="thumb-placeholder" style="display:${thumbnailUrl ? 'none' : 'inline'};">${icon}</span>
                 </td>
-                <td title="${video.name}">${truncateText(video.name, 30)}</td>
+                <td title="${video.video_name || video.name}">${truncateText(video.video_name || video.name, 30)}</td>
                 <td>${video.category_name}</td>
                 <td>${video.size_mb} MB</td>
                 <td>${uploadTime}</td>
                 <td><span class="status status-${status}">${statusText}</span></td>
                 <td>
                     ${video.hidden ?
-                        `<button class="btn btn-show" onclick="toggleVideoShow('${video.key}')">显示</button>` :
-                        `<button class="btn btn-hide" onclick="toggleVideoHide('${video.key}')">隐藏</button>`
+                        `<button class="btn btn-show" onclick="toggleVideoShow('${video.video_key || video.key}')">显示</button>` :
+                        `<button class="btn btn-hide" onclick="toggleVideoHide('${video.video_key || video.key}')">隐藏</button>`
                     }
-                    <button class="btn btn-delete" onclick="handleDelete('${video.key}', '${video.name}')">删除</button>
+                    <button class="btn btn-delete" onclick="handleDelete('${video.video_key || video.key}', '${video.video_name || video.name}')">删除</button>
                 </td>
             </tr>
         `;

@@ -21,6 +21,7 @@ from config import (
     COS_SECRET_ID, COS_SECRET_KEY, COS_BUCKET, COS_REGION,
     VIDEO_CATEGORIES, HISTORY_FILE, API_HOST, API_PORT, STATIC_FOLDER
 )
+import database
 
 app = Flask(__name__, static_folder=STATIC_FOLDER, static_url_path='/static')
 
@@ -351,79 +352,64 @@ def index():
     return send_from_directory(app.static_folder, 'index.html')
 
 
+@app.route('/api/sync', methods=['POST'])
+@requires_auth
+def sync_videos():
+    """从COS同步视频到数据库"""
+    print("[INFO] Starting video sync from COS...")
+
+    if not cos_client:
+        return jsonify({
+            'code': 200,
+            'message': 'demo_mode',
+            'data': {'message': '演示模式：COS未配置'}
+        })
+
+    total_synced = 0
+    for cat_key, cat_info in VIDEO_CATEGORIES.items():
+        prefix = cat_info['path']
+        files = get_cos_files(prefix)
+
+        # 转换为数据库格式
+        cos_files = []
+        for f in files:
+            cos_files.append({
+                'key': f['key'],
+                'name': f['name'],
+                'size': f['size'],
+                'size_mb': f['size_mb'],
+                'modified': f['modified']
+            })
+
+        # 同步到数据库
+        database.sync_videos_from_cos(cos_files, cat_key, cat_info['name'], cat_info['icon'])
+        total_synced += len(cos_files)
+        print(f"[INFO] Synced {len(cos_files)} videos for category {cat_key}")
+
+    return jsonify({
+        'code': 0,
+        'message': '同步成功',
+        'data': {
+            'total_synced': total_synced
+        }
+    })
+
+
 @app.route('/api/videos', methods=['GET'])
 def get_all_videos():
-    """获取所有视频列表（过滤隐藏视频）"""
+    """获取所有视频列表（从数据库）"""
     category = request.args.get('category', '')
-    
-    # 获取隐藏视频列表
-    hidden_list = get_hidden_list()
-    
-    # 演示模式：直接返回mock数据
-    if not cos_client:
-        all_files = []
-        if category and category in VIDEO_CATEGORIES:
-            prefix = VIDEO_CATEGORIES[category]['path']
-            files = MOCK_VIDEOS.get(prefix, [])
-            for f in files:
-                f['category'] = category
-                f['category_name'] = VIDEO_CATEGORIES[category]['name']
-                f['category_icon'] = VIDEO_CATEGORIES[category]['icon']
-            all_files = files
-        else:
-            for cat_key, cat_info in VIDEO_CATEGORIES.items():
-                prefix = cat_info['path']
-                files = MOCK_VIDEOS.get(prefix, [])
-                for f in files:
-                    f['category'] = cat_key
-                    f['category_name'] = cat_info['name']
-                    f['category_icon'] = cat_info['icon']
-                all_files.extend(files)
-        # 过滤隐藏视频
-        all_files = [f for f in all_files if f['key'] not in hidden_list]
-        all_files.sort(key=lambda x: (x['category'], x['name']))
-        return jsonify({
-            'code': 0,
-            'message': 'success',
-            'data': {
-                'categories': [
-                    {
-                        'key': k,
-                        'name': v['name'],
-                        'icon': v['icon'],
-                        'path': v['path']
-                    } for k, v in VIDEO_CATEGORIES.items()
-                ],
-                'videos': all_files,
-                'total': len(all_files)
-            }
-        })
-    
-    all_files = []
-    
-    if category and category in VIDEO_CATEGORIES:
-        prefix = VIDEO_CATEGORIES[category]['path']
-        files = get_cos_files(prefix)
-        for f in files:
-            f['category'] = category
-            f['category_name'] = VIDEO_CATEGORIES[category]['name']
-            f['category_icon'] = VIDEO_CATEGORIES[category]['icon']
-        all_files = files
-    else:
-        for cat_key, cat_info in VIDEO_CATEGORIES.items():
-            files = get_cos_files(cat_info['path'])
-            for f in files:
-                f['category'] = cat_key
-                f['category_name'] = cat_info['name']
-                f['category_icon'] = cat_info['icon']
-            all_files.extend(files)
-    
-    # 过滤隐藏视频
-    all_files = [f for f in all_files if f['key'] not in hidden_list]
-    
+
+    # 从数据库获取
+    all_videos = database.get_all_videos(include_hidden=False)
+
+    # 按分类过滤
+    if category:
+        all_videos = [v for v in all_videos if v['category'] == category]
+
     # 按分类和名称排序
-    all_files.sort(key=lambda x: (x['category'], x['name']))
-    
+    all_videos.sort(key=lambda x: (x['category'], x['video_name']))
+
     return jsonify({
         'code': 0,
         'message': 'success',
@@ -436,8 +422,8 @@ def get_all_videos():
                     'path': v['path']
                 } for k, v in VIDEO_CATEGORIES.items()
             ],
-            'videos': all_files,
-            'total': len(all_files)
+            'videos': all_videos,
+            'total': len(all_videos)
         }
     })
 
@@ -759,29 +745,23 @@ def admin_check():
 @app.route('/api/admin/videos', methods=['GET'])
 @requires_auth
 def admin_get_videos():
-    """管理员获取视频列表（包含隐藏状态）"""
+    """管理员获取视频列表（从数据库，包含隐藏状态）"""
     category = request.args.get('category', '')
-    
-    all_files = []
-    for cat_key, cat_info in VIDEO_CATEGORIES.items():
-        if category and category != cat_key:
-            continue
-        files = get_cos_files(cat_info['path'])
-        for f in files:
-            f['category'] = cat_key
-            f['category_name'] = cat_info['name']
-            f['category_icon'] = cat_info['icon']
-            f['hidden'] = is_video_hidden(f['key'])
-        all_files.extend(files)
-    
-    all_files.sort(key=lambda x: (x['category'], x['name']))
-    
+
+    all_videos = database.get_all_videos(include_hidden=True)
+
+    # 按分类过滤
+    if category:
+        all_videos = [v for v in all_videos if v['category'] == category]
+
+    all_videos.sort(key=lambda x: (x['category'], x['video_name']))
+
     return jsonify({
         'code': 0,
         'message': 'success',
         'data': {
-            'videos': all_files,
-            'total': len(all_files)
+            'videos': all_videos,
+            'total': len(all_videos)
         }
     })
 
@@ -828,37 +808,19 @@ def admin_hide_video():
     """隐藏视频"""
     req_data = request.get_json()
     key = req_data.get('key')
-    
+
     if not key:
         return jsonify({
             'code': 400,
             'message': '请提供视频key'
         }), 400
-    
-    hidden_file = os.path.join(os.path.dirname(__file__), 'hidden_videos.json')
-    hidden_list = []
-    
-    if os.path.exists(hidden_file):
-        try:
-            with open(hidden_file, 'r', encoding='utf-8') as f:
-                hidden = json.load(f)
-                hidden_list = hidden.get('hidden', [])
-        except:
-            pass
-    
-    if key not in hidden_list:
-        hidden_list.append(key)
-    
-    if save_hidden_videos(hidden_list):
-        return jsonify({
-            'code': 0,
-            'message': '隐藏成功'
-        })
-    else:
-        return jsonify({
-            'code': 500,
-            'message': '隐藏失败'
-        }), 500
+
+    database.update_video_hidden(key, 1)
+    return jsonify({
+        'code': 0,
+        'message': '隐藏成功'
+    })
+
 
 @app.route('/api/admin/video/show', methods=['POST'])
 @requires_auth
@@ -866,37 +828,19 @@ def admin_show_video():
     """显示视频（取消隐藏）"""
     req_data = request.get_json()
     key = req_data.get('key')
-    
+
     if not key:
         return jsonify({
             'code': 400,
             'message': '请提供视频key'
         }), 400
-    
-    hidden_file = os.path.join(os.path.dirname(__file__), 'hidden_videos.json')
-    hidden_list = []
-    
-    if os.path.exists(hidden_file):
-        try:
-            with open(hidden_file, 'r', encoding='utf-8') as f:
-                hidden = json.load(f)
-                hidden_list = hidden.get('hidden', [])
-        except:
-            pass
-    
-    if key in hidden_list:
-        hidden_list.remove(key)
-    
-    if save_hidden_videos(hidden_list):
-        return jsonify({
-            'code': 0,
-            'message': '已显示'
-        })
-    else:
-        return jsonify({
-            'code': 500,
-            'message': '操作失败'
-        }), 500
+
+    database.update_video_hidden(key, 0)
+    return jsonify({
+        'code': 0,
+        'message': '已显示'
+    })
+
 
 @app.route('/api/admin/video/delete', methods=['DELETE'])
 @requires_auth
@@ -925,20 +869,10 @@ def admin_delete_video():
             Bucket=COS_BUCKET,
             Key=key
         )
-        
-        # 从隐藏列表中移除
-        hidden_file = os.path.join(os.path.dirname(__file__), 'hidden_videos.json')
-        if os.path.exists(hidden_file):
-            try:
-                with open(hidden_file, 'r', encoding='utf-8') as f:
-                    hidden = json.load(f)
-                    hidden_list = hidden.get('hidden', [])
-                if key in hidden_list:
-                    hidden_list.remove(key)
-                    save_hidden_videos(hidden_list)
-            except:
-                pass
-        
+
+        # 从数据库删除
+        database.delete_video(key)
+
         return jsonify({
             'code': 0,
             'message': '删除成功'
@@ -952,6 +886,25 @@ def admin_delete_video():
 
 
 if __name__ == '__main__':
+    # 初始化数据库并从COS同步
+    print('[INFO] Initializing database and syncing from COS...')
+    init_cos_client()
+    if cos_client:
+        for cat_key, cat_info in VIDEO_CATEGORIES.items():
+            prefix = cat_info['path']
+            files = get_cos_files(prefix)
+            cos_files = []
+            for f in files:
+                cos_files.append({
+                    'key': f['key'],
+                    'name': f['name'],
+                    'size': f['size'],
+                    'size_mb': f['size_mb'],
+                    'modified': f['modified']
+                })
+            database.sync_videos_from_cos(cos_files, cat_key, cat_info['name'], cat_info['icon'])
+            print(f'[INFO] Synced {len(cos_files)} videos for {cat_key}')
+
     print('[INFO] Starting Kids Education Platform API Server...')
     print('[INFO] Access URL: http://{}:{}'.format(API_HOST, API_PORT))
     print('[INFO] Frontend: http://{}:{}/'.format(API_HOST, API_PORT))
