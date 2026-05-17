@@ -348,3 +348,96 @@ html, body {
         margin-right: 4px;
     }
 }
+
+/* 大屏幕/TV适配 */
+@media (min-width: 1920px) {
+    html {
+        font-size: 18px;
+    }
+    
+    .sidebar {
+        width: 300px;
+    }
+    
+    .sidebar-header {
+        padding: 25px;
+    }
+    
+    .sidebar-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .sidebar-nav {
+        padding: 20px;
+    }
+    
+    .nav-item {
+        padding: 16px 20px;
+        font-size: 1.1rem;
+    }
+    
+    .sidebar-footer {
+        padding: 20px;
+    }
+    
+    .logout-btn {
+        padding: 16px 20px;
+        font-size: 1.1rem;
+    }
+    
+    .top-bar {
+        padding: 20px 35px;
+    }
+    
+    .top-left h2 {
+        font-size: 1.6rem;
+    }
+    
+    .content-area {
+        padding: 30px;
+    }
+    
+    .filter-bar {
+        gap: 15px;
+    }
+    
+    .filter-bar select,
+    .filter-bar input {
+        padding: 12px 18px;
+        font-size: 1rem;
+    }
+    
+    .video-table th,
+    .video-table td {
+        padding: 18px 22px;
+        font-size: 1rem;
+    }
+    
+    .btn {
+        padding: 8px 18px;
+        font-size: 0.95rem;
+    }
+    
+    .status {
+        padding: 6px 16px;
+        font-size: 0.9rem;
+    }
+    
+    .empty-state {
+        padding: 80px 30px;
+    }
+    
+    .empty-icon {
+        font-size: 5rem;
+    }
+}
+
+@media (min-width: 2560px) {
+    html {
+        font-size: 20px;
+    }
+    
+    .sidebar {
+        width: 350px;
+    }
+}

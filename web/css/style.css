@@ -923,42 +923,418 @@ body {
     margin-top: 15px;
 }
 
-/* 响应式调整 */
-@media (max-width: 768px) {
-    .header-content {
-        flex-direction: column;
-        gap: 15px;
+/* ==================== 完整响应式设计 - 适配手机、平板、电脑、TV ==================== */
+
+/* 基础响应式设置 */
+html {
+    /* 基础字体大小缩放，适合TV等大屏 */
+    font-size: 16px;
+}
+
+/* 超小屏手机 (<480px) */
+@media (max-width: 479px) {
+    html {
+        font-size: 14px;
+    }
+    
+    .container {
+        padding: 10px;
+    }
+    
+    /* 头部 */
+    .header {
+        padding: 15px 0;
     }
     
     .header h1 {
-        font-size: 1.8rem;
+        font-size: 1.4rem;
     }
     
-    .login-btn {
-        padding: 10px 20px;
+    .subtitle {
+        font-size: 0.95rem;
+    }
+    
+    /* 搜索栏 */
+    .search-bar {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .search-bar input {
+        max-width: 100%;
+        padding: 12px 16px;
+    }
+    
+    .search-bar button {
+        width: 100%;
+        max-width: 300px;
+        padding: 12px;
+    }
+    
+    /* 统计栏 */
+    .stats-bar {
+        gap: 15px;
+    }
+    
+    .stat-item {
+        padding: 10px 18px;
+        min-width: auto;
+    }
+    
+    /* 分类标签 */
+    .category-tabs {
+        gap: 8px;
+        padding: 0 5px;
+    }
+    
+    .category-tab {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+    
+    /* 视频网格 */
+    .video-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .video-card {
+        padding: 10px;
+        border-radius: 12px;
+    }
+    
+    .video-thumbnail {
+        font-size: 2.5rem;
+        padding: 25px 10px;
+    }
+    
+    .video-info h4 {
+        font-size: 0.9rem;
+    }
+    
+    /* 播放历史 */
+    .history-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .history-thumbnail {
+        font-size: 2rem;
+        width: 60px;
+        height: 60px;
+    }
+    
+    .history-info {
+        flex: 1;
+    }
+    
+    .history-meta {
+        font-size: 0.85rem;
+    }
+    
+    /* 弹窗 */
+    .modal-content {
+        width: 95%;
+        max-width: 340px;
+    }
+    
+    .modal-header {
+        padding: 12px 16px;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.1rem;
+    }
+    
+    .modal-body {
+        padding: 16px;
+    }
+    
+    .form-group input {
+        padding: 10px 12px;
+    }
+    
+    .login-submit-btn {
+        padding: 12px;
+    }
+    
+    /* 设置按钮 */
+    .settings-btn {
+        padding: 8px 14px;
+        font-size: 0.9rem;
+    }
+    
+    .dropdown-menu {
+        min-width: 140px;
+    }
+    
+    .dropdown-menu a,
+    .dropdown-menu .dropdown-btn {
+        padding: 10px 14px;
         font-size: 0.9rem;
     }
 }
 
-@media (max-width: 480px) {
-    .header-content {
-        gap: 12px;
+/* 小屏手机 (480px - 767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+    html {
+        font-size: 15px;
+    }
+    
+    .container {
+        padding: 12px;
+    }
+    
+    /* 头部 */
+    .header h1 {
+        font-size: 1.6rem;
+    }
+    
+    /* 搜索栏 */
+    .search-bar input {
+        max-width: 350px;
+    }
+    
+    /* 统计栏 */
+    .stats-bar {
+        gap: 20px;
+    }
+    
+    /* 视频网格 */
+    .video-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    /* 分类标签 */
+    .category-tabs {
+        gap: 10px;
+    }
+    
+    .category-tab {
+        padding: 12px 18px;
+    }
+}
+
+/* 平板 (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    html {
+        font-size: 16px;
+    }
+    
+    .container {
+        padding: 15px;
+    }
+    
+    /* 头部 */
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    /* 搜索栏 */
+    .search-bar input {
+        max-width: 420px;
+    }
+    
+    /* 视频网格 */
+    .video-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+    }
+}
+
+/* 小型电脑 (1024px - 1399px) */
+@media (min-width: 1024px) and (max-width: 1399px) {
+    html {
+        font-size: 16px;
+    }
+    
+    /* 视频网格 */
+    .video-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* 标准电脑 (1400px - 1919px) */
+@media (min-width: 1400px) and (max-width: 1919px) {
+    html {
+        font-size: 16px;
+    }
+    
+    .container {
+        max-width: 1600px;
+    }
+    
+    /* 视频网格 */
+    .video-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 22px;
+    }
+    
+    .video-card {
+        padding: 15px;
+    }
+}
+
+/* 大屏幕/TV (>=1920px) */
+@media (min-width: 1920px) {
+    html {
+        font-size: 18px;
+    }
+    
+    .container {
+        max-width: 1920px;
+        padding: 25px;
+    }
+    
+    /* 头部 */
+    .header {
+        padding: 35px 0;
     }
     
     .header h1 {
-        font-size: 1.5rem;
+        font-size: 3rem;
     }
     
+    .subtitle {
+        font-size: 1.3rem;
+    }
+    
+    /* 搜索栏 */
+    .search-bar input {
+        max-width: 600px;
+        padding: 18px 25px;
+        font-size: 1.1rem;
+    }
+    
+    .search-bar button {
+        padding: 18px 40px;
+        font-size: 1.1rem;
+    }
+    
+    /* 统计栏 */
+    .stats-bar {
+        gap: 50px;
+    }
+    
+    .stat-item {
+        padding: 20px 45px;
+        min-width: 140px;
+    }
+    
+    /* 分类标签 */
+    .category-tabs {
+        gap: 15px;
+    }
+    
+    .category-tab {
+        padding: 16px 28px;
+        font-size: 1.1rem;
+    }
+    
+    /* 视频网格 */
+    .video-grid {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 25px;
+    }
+    
+    .video-card {
+        padding: 20px;
+        border-radius: 20px;
+    }
+    
+    .video-thumbnail {
+        font-size: 4rem;
+        padding: 40px 20px;
+    }
+    
+    .video-info h4 {
+        font-size: 1.1rem;
+    }
+    
+    /* 弹窗 */
     .modal-content {
-        width: 95%;
-        border-radius: 15px;
+        max-width: 520px;
     }
     
     .modal-header {
-        padding: 15px 20px;
+        padding: 25px 30px;
     }
     
     .modal-body {
-        padding: 20px;
+        padding: 35px;
+    }
+    
+    /* 按钮 */
+    .settings-btn {
+        padding: 14px 24px;
+        font-size: 1.1rem;
+    }
+    
+    .login-btn {
+        padding: 14px 32px;
+        font-size: 1.1rem;
+    }
+}
+
+/* 超宽屏/巨屏TV (>=2560px) */
+@media (min-width: 2560px) {
+    html {
+        font-size: 20px;
+    }
+    
+    .container {
+        max-width: 2400px;
+        padding: 35px;
+    }
+    
+    /* 视频网格 */
+    .video-grid {
+        grid-template-columns: repeat(8, 1fr);
+        gap: 30px;
+    }
+    
+    .video-card {
+        padding: 25px;
+    }
+    
+    .video-thumbnail {
+        font-size: 4.5rem;
+        padding: 50px 25px;
+    }
+}
+
+/* 横竖屏适配 */
+@media (orientation: portrait) {
+    /* 竖屏时调整视频网格列数 */
+    .video-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @media (min-width: 768px) and (orientation: portrait) {
+        .video-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    
+    @media (min-width: 1024px) and (orientation: portrait) {
+        .video-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+}
+
+/* 打印模式 */
+@media print {
+    body {
+        background: white;
+    }
+    
+    .search-bar,
+    .category-tabs,
+    .settings-menu,
+    .history-section {
+        display: none !important;
     }
 }
