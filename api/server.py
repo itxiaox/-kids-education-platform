@@ -270,12 +270,12 @@ def proxy_video(path):
             print(f"[ERROR] 视频流传输中断: {e}")
     
     filename = os.path.basename(key)
-    
+
     return Response(
         generate(),
         mimetype='video/mp4',
         headers={
-            'Content-Disposition': f'inline; filename="{filename}"',
+            'Content-Length': video_stream.total_size if hasattr(video_stream, 'total_size') else '',
             'Accept-Ranges': 'bytes',
             'Cache-Control': 'no-cache'
         }
@@ -621,6 +621,17 @@ def get_stats():
 
 # ==================== 管理员相关API ====================
 
+@app.route('/history.html')
+@app.route('/history')
+def history_page():
+    """返回播放历史页面"""
+    history_html_path = os.path.join(app.static_folder, 'history.html')
+    if os.path.exists(history_html_path):
+        with open(history_html_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    return 'History page not found', 404
+
+@app.route('/admin.html')
 @app.route('/admin')
 def admin_page():
     """返回管理页面"""
