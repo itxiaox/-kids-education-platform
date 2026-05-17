@@ -343,6 +343,26 @@ body {
     justify-content: center;
     font-size: 3rem;
     margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.video-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.video-thumb-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.upload-time {
+    font-size: 0.75rem;
+    color: #888;
 }
 
 .video-item h3 {

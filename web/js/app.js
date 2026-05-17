@@ -10,6 +10,25 @@ let currentPlaying = null;
 
 // API基础URL
 const API_BASE = '';
+const COS_BUCKET = 'itxiaox-1301580359';
+const COS_REGION = 'ap-shanghai';
+
+// 生成视频缩略图URL
+function getThumbnailUrl(videoKey) {
+    if (!COS_BUCKET || !COS_REGION) return null;
+    const videoName = videoKey.split('/').pop().replace(/\.[^.]+$/, '');
+    const dir = videoKey.substring(0, videoKey.lastIndexOf('/'));
+    return `${dir}/thumbs/${videoName}.jpg`;
+}
+
+// 格式化时间显示
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    try {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    } catch { return ''; }
+}
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
@@ -114,13 +133,18 @@ function renderVideos() {
     
     filteredVideos.forEach(video => {
         const catInfo = categoryNames[video.category] || { name: video.category, icon: '📁' };
+        const thumbUrl = getThumbnailUrl(video.key);
+        const uploadTime = formatDate(video.modified);
         html += `
             <div class="video-item" onclick="playVideo('${video.key}', '${video.name}', '${video.category}')">
-                <div class="video-thumb">${catInfo.icon}</div>
+                <div class="video-thumb">
+                    ${thumbUrl ? `<img src="/api/proxy/thumbnail/${encodeURIComponent(video.key.replace(/\.[^.]+$/, ''))}/thumbs/${video.key.split('/').pop().replace(/\.[^.]+$/, '')}.jpg" class="video-thumb-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><span class="video-thumb-placeholder" style="display:none;">${catInfo.icon}</span>` : `<span class="video-thumb-placeholder" style="display:flex;">${catInfo.icon}</span>`}
+                </div>
                 <h3>${video.name}</h3>
                 <div class="meta">
                     <span class="category-tag">${catInfo.name}</span>
                     <span>${video.size_mb} MB</span>
+                    ${uploadTime ? `<span class="upload-time">${uploadTime}</span>` : ''}
                 </div>
             </div>
         `;
