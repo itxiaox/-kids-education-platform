@@ -62,6 +62,54 @@ body {
     transform: scale(1.1);
 }
 
+/* 下拉菜单 */
+.dropdown-menu {
+    position: absolute;
+    top: 56px;
+    left: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    min-width: 160px;
+    overflow: hidden;
+    display: none;
+    z-index: 1000;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.3s;
+    font-size: 14px;
+}
+
+.dropdown-menu a:hover {
+    background: #f8f9fa;
+}
+
+.dropdown-menu .dropdown-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    color: #333;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-size: 14px;
+}
+
+.dropdown-menu .dropdown-btn:hover {
+    background: #f8f9fa;
+}
+
 /* 品牌区域 */
 .brand {
     text-align: center;
@@ -1278,7 +1326,6 @@ html {
     
     .search-bar,
     .category-tabs,
-    .settings-menu,
     .history-section {
         display: none !important;
     }
