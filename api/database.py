@@ -49,8 +49,8 @@ def init_db():
     conn.commit()
     conn.close()
 
-def sync_videos_from_cos(cos_files, category, category_name, category_icon):
-    """从COS同步视频到数据库"""
+def sync_videos_from_cos(cos_files, category, category_name, category_icon, cos_client=None, bucket=None):
+    """从COS同步视频到数据库，同时查询每个视频对应的缩略图"""
     conn = get_db()
     cursor = conn.cursor()
 
@@ -61,10 +61,41 @@ def sync_videos_from_cos(cos_files, category, category_name, category_icon):
         cursor.execute('SELECT id FROM videos WHERE video_key = ?', (key,))
         exists = cursor.fetchone()
 
-        # 构建缩略图路径：在thumbs子目录下同名.jpg
-        video_name = key.split('/')[-1].rsplit('.', 1)[0]
-        dir_path = key[:key.rfind('/')]
-        thumbnail_key = f"{dir_path}/thumbs/{video_name}.jpg"
+        # 从COS查询该目录下的thumbs文件
+        video_dir = key[:key.rfind('/')]
+        video_name_no_ext = key.split('/')[-1].rsplit('.', 1)[0]
+        thumbs_prefix = f"{video_dir}/thumbs/"
+
+        thumbnail_key = None
+        if cos_client and bucket:
+            try:
+                response = cos_client.list_objects(Bucket=bucket, Prefix=thumbs_prefix)
+                contents = response.get('Contents', [])
+                for item in contents:
+                    thumb_key = item['Key']
+                    # 跳过目录
+                    if thumb_key.endswith('/'):
+                        continue
+                    # 获取缩略图文件名（不带路径）
+                    thumb_name = thumb_key.split('/')[-1]
+                    # 简单匹配：thumbnail name去掉.jpg后应该包含视频名的关键部分
+                    thumb_name_no_ext = thumb_name.rsplit('.', 1)[0]
+                    # 提取视频名中的关键标识（通常是大写字母开头的部分）
+                    import re
+                    video_parts = re.split(r'[_\-]', video_name_no_ext)
+                    for part in video_parts:
+                        if len(part) > 5 and part in thumb_name_no_ext:
+                            thumbnail_key = thumb_key
+                            break
+                    if thumbnail_key:
+                        break
+            except Exception as e:
+                print(f"[WARN] 查询缩略图失败: {e}")
+
+        # 如果没找到匹配，使用默认规则
+        if not thumbnail_key:
+            dir_path = key[:key.rfind('/')]
+            thumbnail_key = f"{dir_path}/thumbs/{video_name_no_ext}.jpg"
 
         if exists:
             # 更新

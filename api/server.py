@@ -382,7 +382,7 @@ def sync_videos():
             })
 
         # 同步到数据库
-        database.sync_videos_from_cos(cos_files, cat_key, cat_info['name'], cat_info['icon'])
+        database.sync_videos_from_cos(cos_files, cat_key, cat_info['name'], cat_info['icon'], cos_client, COS_BUCKET)
         total_synced += len(cos_files)
         print(f"[INFO] Synced {len(cos_files)} videos for category {cat_key}")
 
@@ -902,7 +902,7 @@ if __name__ == '__main__':
                     'size_mb': f['size_mb'],
                     'modified': f['modified']
                 })
-            database.sync_videos_from_cos(cos_files, cat_key, cat_info['name'], cat_info['icon'])
+            database.sync_videos_from_cos(cos_files, cat_key, cat_info['name'], cat_info['icon'], cos_client, COS_BUCKET)
             print(f'[INFO] Synced {len(cos_files)} videos for {cat_key}')
 
     print('[INFO] Starting Kids Education Platform API Server...')
