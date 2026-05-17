@@ -230,6 +230,32 @@ body {
     display: grid;
     grid-template-columns: 1fr 300px;
     gap: 20px;
+    align-items: start;
+}
+
+/* 移动端主内容区优化 */
+@media (max-width: 1024px) {
+    .main-content {
+        grid-template-columns: 1fr 260px;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .history-section {
+        order: -1;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        gap: 10px;
+    }
 }
 
 /* 播放器区域 */
@@ -316,8 +342,9 @@ body {
 
 .video-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 20px;
+    grid-auto-rows: auto;
 }
 
 .video-item {
@@ -335,7 +362,7 @@ body {
 
 .video-item .video-thumb {
     width: 100%;
-    height: 150px;
+    aspect-ratio: 16 / 10;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 10px;
     display: flex;
@@ -344,6 +371,7 @@ body {
     font-size: 3rem;
     margin-bottom: 10px;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .video-thumb-img {
@@ -580,7 +608,7 @@ body {
     }
     
     .video-item .video-thumb {
-        height: 110px;
+        aspect-ratio: 16 / 10;
         font-size: 2.5rem;
     }
     
@@ -673,7 +701,7 @@ body {
     }
     
     .video-item .video-thumb {
-        height: 90px;
+        aspect-ratio: 16 / 10;
         font-size: 2rem;
         border-radius: 8px;
     }
