@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎬 幼升小教育动画学习平台</title>
+    <title>🎬 儿童教育动画学习平台</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
@@ -11,11 +11,19 @@
         <!-- 头部 -->
         <header class="header">
             <div class="header-content">
-                <div>
-                    <h1>🎬 幼升小教育动画学习平台</h1>
-                    <p class="subtitle">专为3-6岁儿童打造的学习乐园</p>
+                <!-- 左上角设置按钮 -->
+                <div class="settings-menu">
+                    <button class="settings-btn" id="settingsBtn">⚙️ 设置</button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="/history.html">📜 播放历史</a>
+                        <button class="dropdown-btn" onclick="showLoginModal()">🔐 管理员登录</button>
+                    </div>
                 </div>
-                <button class="login-btn" id="loginBtn" onclick="showLoginModal()">🔐 管理员登录</button>
+                <!-- 中间品牌 -->
+                <div class="brand">
+                    <h1>🎬 伴我学 - 儿童教育动画学习平台</h1>
+                    <p class="subtitle">让孩子在快乐中学习成长</p>
+                </div>
             </div>
         </header>
 
@@ -83,7 +91,6 @@
             <div class="history-section" id="historySection">
                 <div class="section-header">
                     <h3>📝 播放历史</h3>
-                    <button class="clear-btn" onclick="clearHistory()">清空</button>
                 </div>
                 <div class="history-list" id="historyList">
                     <div class="empty-tip">暂无播放记录</div>

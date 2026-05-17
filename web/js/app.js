@@ -16,7 +16,22 @@ document.addEventListener('DOMContentLoaded', () => {
     loadVideos();
     loadHistory();
     loadStats();
-    
+
+    // 设置按钮下拉菜单
+    const settingsBtn = document.getElementById('settingsBtn');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+
+    if (settingsBtn && dropdownMenu) {
+        settingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        });
+
+        document.addEventListener('click', () => {
+            dropdownMenu.classList.remove('show');
+        });
+    }
+
     // 搜索框回车事件
     document.getElementById('searchInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
@@ -205,8 +220,8 @@ async function loadHistory() {
     try {
         const response = await fetch(`${API_BASE}/api/history`);
         const result = await response.json();
-        
-        if (result.code === 0) {
+
+        if (result.code === 0 && result.data && result.data.history) {
             renderHistory(result.data.history || []);
         }
     } catch (error) {
@@ -301,18 +316,6 @@ async function replayVideo(path, name, category) {
     await playVideo(path, name, category);
 }
 
-// 清空历史
-async function clearHistory() {
-    if (!confirm('确定要清空所有播放记录吗？')) return;
-    
-    try {
-        await fetch(`${API_BASE}/api/history/clear`, { method: 'POST' });
-        loadHistory();
-    } catch (error) {
-        console.error('清空历史失败:', error);
-    }
-}
-
 // 获取分类名称
 function getCategoryName(category) {
     const names = {
@@ -372,7 +375,7 @@ async function handleLogin() {
         if (result.code === 0) {
             localStorage.setItem('admin_token', result.data.token);
             closeLoginModal();
-            window.location.href = '/admin';
+            window.location.href = '/admin.html';
         } else {
             showError(result.message || '登录失败');
         }

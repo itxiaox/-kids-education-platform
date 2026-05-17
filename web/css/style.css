@@ -711,8 +711,92 @@ body {
 /* 头部内容布局 */
 .header-content {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 20px;
+}
+
+.settings-menu {
+    position: relative;
+}
+
+.settings-btn {
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.settings-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    min-width: 160px;
+    overflow: hidden;
+    display: none;
+    z-index: 1000;
+}
+
+.dropdown-menu.show {
+    display: block;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.3s;
+    font-size: 14px;
+}
+
+.dropdown-menu a:hover {
+    background: #f8f9fa;
+}
+
+.dropdown-menu .dropdown-btn {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.3s;
+    font-size: 14px;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.dropdown-menu .dropdown-btn:hover {
+    background: #f8f9fa;
+}
+    flex: 1;
+    text-align: center;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: white;
+}
+
+.brand .subtitle {
+    margin: 8px 0 0 0;
+    font-size: 1rem;
+    color: rgba(255,255,255,0.85);
 }
 
 .login-btn {
