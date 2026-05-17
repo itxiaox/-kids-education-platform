@@ -186,6 +186,9 @@ def get_cos_files(prefix):
             for item in contents:
                 key = item['Key']
                 if not key.endswith('/'):  # 排除目录
+                    # 排除图片文件（缩略图），只保留视频文件
+                    if key.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp')):
+                        continue
                     files.append({
                         'key': key,
                         'name': os.path.basename(key),
