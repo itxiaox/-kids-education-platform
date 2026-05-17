@@ -148,7 +148,7 @@ function renderVideos() {
         html += `
             <div class="video-item" onclick="playVideo('${videoKey}', '${videoName}', '${videoCategory}')">
                 <div class="video-thumb">
-                    ${thumbUrl ? `<img src="/api/proxy/thumbnail/${encodeURIComponent(thumbUrl)}" class="video-thumb-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><span class="video-thumb-placeholder" style="display:none;">${catInfo.icon}</span>` : `<span class="video-thumb-placeholder" style="display:flex;">${catInfo.icon}</span>`}
+                    ${thumbUrl ? `<img src="${thumbUrl}" class="video-thumb-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><span class="video-thumb-placeholder" style="display:none;">${catInfo.icon}</span>` : `<span class="video-thumb-placeholder" style="display:flex;">${catInfo.icon}</span>`}
                 </div>
                 <h3>${videoName}</h3>
                 <div class="meta">
