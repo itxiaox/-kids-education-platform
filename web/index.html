@@ -5,6 +5,215 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎬 AI伴我学 - 儿童教育动画学习平台</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* ========== 功能导航栏 ========== */
+        .func-nav {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .func-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 24px;
+            background: rgba(255,255,255,0.15);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+        .func-btn:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+        }
+        .func-btn.active {
+            background: rgba(255,255,255,0.95);
+            color: #667eea;
+            border-color: #667eea;
+        }
+        .func-btn .icon {
+            font-size: 28px;
+        }
+        .func-btn .label {
+            font-weight: 600;
+        }
+        .func-btn .desc {
+            font-size: 11px;
+            opacity: 0.8;
+        }
+
+        /* ========== 功能区域 ========== */
+        .func-section {
+            display: none;
+            padding: 20px 0;
+        }
+        .func-section.active {
+            display: block;
+        }
+        .section-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 16px;
+            padding-left: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        /* ========== Wiki博客区域 ========== */
+        .wiki-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+        .wiki-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .wiki-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(102,126,234,0.2);
+        }
+        .wiki-card .icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+        .wiki-card h3 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .wiki-card p {
+            color: #666;
+            font-size: 13px;
+        }
+
+        /* ========== 知识库区域 ========== */
+        .knowledge-tree {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .knowledge-category {
+            margin-bottom: 20px;
+        }
+        .knowledge-category h4 {
+            color: #667eea;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .knowledge-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .knowledge-tag {
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .knowledge-tag:hover {
+            background: linear-gradient(135deg, #667eea40, #764ba240);
+        }
+
+        /* ========== 动画游戏区域 ========== */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .game-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .game-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(102,126,234,0.2);
+        }
+        .game-cover {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+        .game-cover.math { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .game-cover.pinyin { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .game-cover.english { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        .game-cover.science { background: linear-gradient(135deg, #fa709a, #fee140); }
+        .game-cover.art { background: linear-gradient(135deg, #a8edea, #fed6e3); }
+        .game-cover.code { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .game-info {
+            padding: 16px;
+        }
+        .game-info h4 {
+            color: #333;
+            margin-bottom: 6px;
+        }
+        .game-info .meta {
+            font-size: 12px;
+            color: #999;
+        }
+        .game-info .type {
+            display: inline-block;
+            background: #667eea20;
+            color: #667eea;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        /* ========== 投稿入口 ========== */
+        .contribute-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 16px;
+            margin-top: 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .contribute-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+        }
+
+        /* ========== 视频列表隐藏 ========== */
+        #videoListSection {
+            transition: opacity 0.3s;
+        }
+        #videoListSection.hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -18,13 +227,13 @@
                     <button class="dropdown-btn" onclick="showLoginModal()">🔐 管理员登录</button>
                 </div>
             </div>
-            
+
             <!-- 中间品牌 -->
             <div class="brand">
                 <h1>🎬 AI伴我学</h1>
                 <p class="subtitle">儿童教育动画学习平台</p>
             </div>
-            
+
             <!-- 右侧占位 -->
             <div class="header-right"></div>
         </header>
@@ -33,6 +242,30 @@
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="🔍 搜索视频..." autocomplete="off" value="">
             <button onclick="searchVideos()">搜索</button>
+        </div>
+
+        <!-- ========== 功能导航栏 ========== -->
+        <div class="func-nav">
+            <button class="func-btn active" data-func="video" onclick="switchFunc('video')">
+                <span class="icon">📺</span>
+                <span class="label">视频学习</span>
+                <span class="desc">动画课程</span>
+            </button>
+            <button class="func-btn" data-func="wiki" onclick="switchFunc('wiki')">
+                <span class="icon">📚</span>
+                <span class="label">Wiki博客</span>
+                <span class="desc">知识百科</span>
+            </button>
+            <button class="func-btn" data-func="knowledge" onclick="switchFunc('knowledge')">
+                <span class="icon">🧠</span>
+                <span class="label">知识库</span>
+                <span class="desc">知识点图谱</span>
+            </button>
+            <button class="func-btn" data-func="game" onclick="switchFunc('game')">
+                <span class="icon">🎮</span>
+                <span class="label">动画游戏</span>
+                <span class="desc">寓教于乐</span>
+            </button>
         </div>
 
         <!-- 统计信息 -->
@@ -93,30 +326,163 @@
 
         <!-- 主内容区 -->
         <div class="main-content">
-            <!-- 视频播放器 -->
-            <div class="player-section" id="playerSection" style="display: none;">
-                <div class="player-header">
-                    <h2 id="currentVideoName">正在加载...</h2>
-                    <button class="close-btn" onclick="closePlayer()">×</button>
+            <!-- ========== 视频列表区域 ========== -->
+            <div id="videoListSection">
+                <!-- 视频播放器 -->
+                <div class="player-section" id="playerSection" style="display: none;">
+                    <div class="player-header">
+                        <h2 id="currentVideoName">正在加载...</h2>
+                        <button class="close-btn" onclick="closePlayer()">×</button>
+                    </div>
+                    <video id="videoPlayer" controls autoplay>
+                        您的浏览器不支持视频播放
+                    </video>
+                    <div class="player-info" id="playerInfo"></div>
                 </div>
-                <video id="videoPlayer" controls autoplay>
-                    您的浏览器不支持视频播放
-                </video>
-                <div class="player-info" id="playerInfo"></div>
+
+                <!-- 视频列表 -->
+                <div class="video-list" id="videoList">
+                    <div class="loading">加载中...</div>
+                </div>
+
+                <!-- 播放历史 -->
+                <div class="history-section" id="historySection">
+                    <div class="section-header">
+                        <h3>📝 播放历史</h3>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <div class="empty-tip">暂无播放记录</div>
+                    </div>
+                </div>
             </div>
 
-            <!-- 视频列表 -->
-            <div class="video-list" id="videoList">
-                <div class="loading">加载中...</div>
+            <!-- ========== Wiki博客区域 ========== -->
+            <div class="func-section" id="wikiSection">
+                <h2 class="section-title">📚 Wiki知识百科</h2>
+                <div class="wiki-grid">
+                    <div class="wiki-card" onclick="showWikiCategory('nature')">
+                        <div class="icon">🌿</div>
+                        <h3>自然探索</h3>
+                        <p>动物、植物、自然现象等科普知识</p>
+                    </div>
+                    <div class="wiki-card" onclick="showWikiCategory('science')">
+                        <div class="icon">🔬</div>
+                        <h3>科学实验</h3>
+                        <p>有趣的小实验、科学原理探索</p>
+                    </div>
+                    <div class="wiki-card" onclick="showWikiCategory('history')">
+                        <div class="icon">🏛️</div>
+                        <h3>历史故事</h3>
+                        <p>历史典故、传统文化故事</p>
+                    </div>
+                    <div class="wiki-card" onclick="showWikiCategory('art')">
+                        <div class="icon">🎨</div>
+                        <h3>文化艺术</h3>
+                        <p>美术、音乐、舞蹈等艺术启蒙</p>
+                    </div>
+                </div>
+                <button class="contribute-btn" onclick="showContributeModal()">
+                    <span>✏️</span>
+                    <span>我要投稿</span>
+                </button>
             </div>
 
-            <!-- 播放历史 -->
-            <div class="history-section" id="historySection">
-                <div class="section-header">
-                    <h3>📝 播放历史</h3>
+            <!-- ========== 知识库区域 ========== -->
+            <div class="func-section" id="knowledgeSection">
+                <h2 class="section-title">🧠 知识库 - 知识点图谱</h2>
+                <div class="knowledge-tree">
+                    <div class="knowledge-category">
+                        <h4>📐 数学思维</h4>
+                        <div class="knowledge-list">
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('math', 'numbers')">认识数字</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('math', 'addition')">加减法</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('math', 'shapes')">形状认知</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('math', 'comparison')">比较大小</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('math', 'patterns')">规律排序</span>
+                        </div>
+                    </div>
+                    <div class="knowledge-category">
+                        <h4>🔤 英语启蒙</h4>
+                        <div class="knowledge-list">
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('english', 'alphabet')">字母学习</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('english', 'vocabulary')">基础词汇</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('english', 'phonics')">自然拼读</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('english', 'dialogue')">日常对话</span>
+                        </div>
+                    </div>
+                    <div class="knowledge-category">
+                        <h4>🅰️ 拼音学习</h4>
+                        <div class="knowledge-list">
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('pinyin', 'initials')">声母</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('pinyin', 'finals')">韵母</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('pinyin', 'tones')">声调</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('pinyin', 'combinations')">拼读组合</span>
+                        </div>
+                    </div>
+                    <div class="knowledge-category">
+                        <h4>🔬 科学探索</h4>
+                        <div class="knowledge-list">
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('science', 'animals')">认识动物</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('science', 'plants')">植物生长</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('science', 'weather')">天气变化</span>
+                            <span class="knowledge-tag" onclick="showKnowledgeDetail('science', 'universe')">太阳系</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="history-list" id="historyList">
-                    <div class="empty-tip">暂无播放记录</div>
+            </div>
+
+            <!-- ========== 动画游戏区域 ========== -->
+            <div class="func-section" id="gameSection">
+                <h2 class="section-title">🎮 动画游戏 - 寓教于乐</h2>
+                <div class="game-grid">
+                    <div class="game-card" onclick="startGame('numberTreasure')">
+                        <div class="game-cover math">🔢</div>
+                        <div class="game-info">
+                            <h4>数字寻宝</h4>
+                            <p class="meta">数学 · 3-6岁 · 探险解谜</p>
+                            <span class="type">知识闯关</span>
+                        </div>
+                    </div>
+                    <div class="game-card" onclick="startGame('pinyinAdventure')">
+                        <div class="game-cover pinyin">🅰️</div>
+                        <div class="game-info">
+                            <h4>拼音大冒险</h4>
+                            <p class="meta">拼音 · 4-7岁 · 闯关模式</p>
+                            <span class="type">知识闯关</span>
+                        </div>
+                    </div>
+                    <div class="game-card" onclick="startGame('englishMatch')">
+                        <div class="game-cover english">🔤</div>
+                        <div class="game-info">
+                            <h4>英语连连看</h4>
+                            <p class="meta">英语 · 3-8岁 · 记忆配对</p>
+                            <span class="type">知识闯关</span>
+                        </div>
+                    </div>
+                    <div class="game-card" onclick="startGame('scienceLab')">
+                        <div class="game-cover science">🔬</div>
+                        <div class="game-info">
+                            <h4>科学实验室</h4>
+                            <p class="meta">科学 · 5-10岁 · 模拟实验</p>
+                            <span class="type">知识闯关</span>
+                        </div>
+                    </div>
+                    <div class="game-card" onclick="startGame('littlePainter')">
+                        <div class="game-cover art">🎨</div>
+                        <div class="game-info">
+                            <h4>小小画家</h4>
+                            <p class="meta">艺术 · 3-12岁 · 自由创作</p>
+                            <span class="type">创意创作</span>
+                        </div>
+                    </div>
+                    <div class="game-card" onclick="startGame('blocklyCode')">
+                        <div class="game-cover code">🧩</div>
+                        <div class="game-info">
+                            <h4>积木编程</h4>
+                            <p class="meta">编程 · 6-12岁 · 可视化编程</p>
+                            <span class="type">创意创作</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -128,6 +494,61 @@
     </div>
 
     <script src="/static/js/app.js"></script>
+    <script>
+        // ========== 功能切换 ==========
+        function switchFunc(func) {
+            // 更新导航按钮状态
+            document.querySelectorAll('.func-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.func === func);
+            });
+
+            // 切换功能区域
+            const sections = ['videoListSection', 'wikiSection', 'knowledgeSection', 'gameSection'];
+            const funcMap = {
+                'video': 'videoListSection',
+                'wiki': 'wikiSection',
+                'knowledge': 'knowledgeSection',
+                'game': 'gameSection'
+            };
+
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (id === 'videoListSection') {
+                    el.classList.toggle('hidden', func !== 'video');
+                } else {
+                    el.classList.toggle('active', id === funcMap[func]);
+                }
+            });
+
+            // 更新搜索框提示
+            const placeholders = {
+                'video': '🔍 搜索视频...',
+                'wiki': '🔍 搜索百科文章...',
+                'knowledge': '🔍 搜索知识点...',
+                'game': '🔍 搜索游戏...'
+            };
+            document.getElementById('searchInput').placeholder = placeholders[func] || placeholders['video'];
+        }
+
+        // ========== Wiki博客 ==========
+        function showWikiCategory(category) {
+            alert('Wiki分类: ' + category + ' - 功能开发中');
+        }
+
+        function showContributeModal() {
+            alert('投稿功能 - 功能开发中');
+        }
+
+        // ========== 知识库 ==========
+        function showKnowledgeDetail(subject, topic) {
+            alert('知识点: ' + subject + '/' + topic + ' - 功能开发中');
+        }
+
+        // ========== 动画游戏 ==========
+        function startGame(game) {
+            alert('游戏: ' + game + ' - 功能开发中');
+        }
+    </script>
 
         <!-- 登录弹窗 -->
         <div class="modal-overlay" id="loginModal" style="display: none;">
