@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Edge TTS 测试</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; padding: 20px; }
+        button { padding: 10px 20px; margin: 5px; font-size: 16px; cursor: pointer; }
+        pre { background: #f5f5f5; padding: 15px; border-radius: 8px; }
+        #status { color: #667eea; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Edge TTS 测试</h1>
+    <div id="status">准备就绪...</div>
+    <button onclick="testEdgeTTS('啊')">测试 "啊"</button>
+    <button onclick="testEdgeTTS('日')">测试 "日"</button>
+    <button onclick="listVoices()">列出可用语音</button>
+    <pre id="output"></pre>
+
+    <script>
+        // Edge TTS for Browser - 直接使用微软TTS WebSocket API
+        const EdgeTTS = {
+            // 微软TTS WebSocket URL
+            WEBSOCKET_URL: 'wss://speech.platform.bing.com/cmd/log?id=1&sid=1',
+
+            // 可用的中文语音
+            VOICES: [
+                'zh-CN-XiaoxiaoNeural',  // 晓晓 - 女声，温柔
+                'zh-CN-XiaoyiNeural',    // 小艺 - 女声，活泼
+                'zh-CN-YunxiNeural',      // 云希 - 男声，清晰
+                'zh-CN-YunyangNeural',    // 云扬 - 男声，稳重
+                'zh-CN-XiaohanNeural',    // 小涵 - 女声，亲切
+                'zh-CN-XiaomengNeural',   // 小孟 - 女声，甜美
+            ],
+
+            // 语音列表（从微软API获取）
+            voiceList: [],
+
+            // 获取语音列表
+            async getVoices() {
+                try {
+                    const resp = await fetch(
+                        'https://speech.platform.bing.com/consumer/speech/synthesize/readaloud/voices/list?trustedclientid=694BTJAU3XKHDTGAHII'
+                    );
+                    const data = await resp.json();
+                    this.voiceList = data.filter(v => v.Locale.startsWith('zh-CN'));
+                    return this.voiceList;
+                } catch(e) {
+                    console.warn('获取语音列表失败:', e);
+                    return [];
+                }
+            },
+
+            // 合成语音
+            async speak(text, voice = 'zh-CN-XiaoxiaoNeural') {
+                return new Promise((resolve, reject) => {
+                    const ws = new WebSocket(this.WEBSOCKET_URL);
+
+                    // 音频数据
+                    let audioChunks = [];
+                    let audioContext = null;
+
+                    ws.onopen = () => {
+                        // 发送配置
+                        const config = {
+                            type: 'config',
+                            audio: {
+                                format: 'audio-24khz-48kbitrate-mono-mp3',
+                                sampleRate: 24000
+                            },
+                            lang: 'zh-CN',
+                            voice: voice,
+                            name: voice,
+                            rate: '-20%',   // 慢速
+                            volume: '+0%',
+                            pitch: '+0Hz'
+                        };
+                        ws.send(JSON.stringify(config));
+                    };
+
+                    ws.onmessage = (event) => {
+                        if (typeof event.data === 'string') {
+                            // 配置响应
+                            console.log('TTS connected');
+                        } else {
+                            // 音频数据
+                            audioChunks.push(event.data);
+                        }
+                    };
+
+                    ws.onerror = (error) => {
+                        console.error('WebSocket error:', error);
+                        reject(error);
+                    };
+
+                    ws.onclose = () => {
+                        // 合并音频
+                        if (audioChunks.length > 0) {
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+                            const url = URL.createObjectURL(audioBlob);
+                            resolve(url);
+                        } else {
+                            reject(new Error('No audio data'));
+                        }
+                    };
+
+                    // 发送文本
+                    setTimeout(() => {
+                        const ssml = `<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xml:lang='zh-CN'>` +
+                            `<voice name='${voice}'>` +
+                            `<prosody rate='-20%' pitch='+0Hz'>${text}</prosody>` +
+                            `</voice></speak>`;
+                        ws.send(ssml);
+                    }, 500);
+                });
+            }
+        };
+
+        // 测试函数
+        async function testEdgeTTS(text) {
+            document.getElementById('status').textContent = '正在合成: ' + text;
+            try {
+                const url = await EdgeTTS.speak(text);
+                const audio = new Audio(url);
+                audio.play();
+                document.getElementById('status').textContent = '播放中: ' + text;
+                audio.onended = () => {
+                    document.getElementById('status').textContent = '完成';
+                };
+            } catch(e) {
+                document.getElementById('status').textContent = '错误: ' + e.message;
+            }
+        }
+
+        async function listVoices() {
+            const voices = await EdgeTTS.getVoices();
+            document.getElementById('output').textContent = '可用中文语音:\n';
+            voices.forEach(v => {
+                document.getElementById('output').textContent += `${v.FriendlyName} (${v.Locale})\n`;
+            });
+        }
+
+        // 页面加载时列出语音
+        EdgeTTS.getVoices().then(listVoices);
+    </script>
+</body>
+</html>

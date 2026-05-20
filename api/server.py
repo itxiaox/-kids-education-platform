@@ -353,6 +353,18 @@ def index():
     return send_from_directory(app.static_folder, 'index.html')
 
 
+@app.route('/pinyin-game/')
+def pinyin_game():
+    """拼音大冒险游戏"""
+    return send_from_directory(os.path.join(app.static_folder, 'pinyin-game'), 'index.html')
+
+
+@app.route('/pinyin-game/<path:path>')
+def pinyin_game_static(path):
+    """拼音大冒险游戏静态资源"""
+    return send_from_directory(os.path.join(app.static_folder, 'pinyin-game'), path)
+
+
 @app.route('/api/sync', methods=['POST'])
 @requires_auth
 def sync_videos():

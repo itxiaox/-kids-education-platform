@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>语音测试</title>
+</head>
+<body>
+    <h1>中文语音测试</h1>
+    <button onclick="testVoice('啊')">测试 "啊"</button>
+    <button onclick="testVoice('日')">测试 "日"</button>
+    <button onclick="listVoices()">列出所有语音</button>
+    <pre id="output"></pre>
+
+    <script>
+        let voicesLoaded = false;
+
+        function loadVoices() {
+            return new Promise((resolve) => {
+                const voices = speechSynthesis.getVoices();
+                if (voices.length > 0) {
+                    voicesLoaded = true;
+                    resolve(voices);
+                } else {
+                    speechSynthesis.onvoiceschanged = () => {
+                        voicesLoaded = true;
+                        resolve(speechSynthesis.getVoices());
+                    };
+                }
+            });
+        }
+
+        async function listVoices() {
+            const voices = await loadVoices();
+            const output = document.getElementById('output');
+
+            const chinese = voices.filter(v =>
+                v.lang.includes('zh') || v.lang.includes('CN')
+            );
+
+            output.textContent = '中文语音 (' + chinese.length + '):\n';
+            chinese.forEach(v => {
+                output.textContent += `- ${v.name}\n  lang: ${v.lang}, localService: ${v.localService}\n`;
+            });
+        }
+
+        async function testVoice(text) {
+            const voices = await loadVoices();
+            const chineseVoices = voices.filter(v =>
+                v.lang.includes('zh') || v.lang.includes('CN')
+            );
+
+            if (chineseVoices.length === 0) {
+                alert('没有中文语音可用');
+                return;
+            }
+
+            // 尝试每个中文语音
+            for (const voice of chineseVoices) {
+                speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.voice = voice;
+                utterance.lang = 'zh-CN';
+                utterance.rate = 0.4;
+                utterance.pitch = 1.15;
+
+                console.log('Testing voice:', voice.name);
+                speechSynthesis.speak(utterance);
+
+                await new Promise(r => setTimeout(r, 2000));
+            }
+        }
+
+        loadVoices();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>拼音大冒险 - 拼音学习游戏</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+        /* 顶部导航 */
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { background: #5a6fd6; transform: translateY(-2px); }
+        .level-info {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 16px;
+        }
+        .heart { color: #ff6b6b; font-size: 20px; }
+        .star { color: #ffc107; font-size: 20px; }
+
+        /* 开始界面 */
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .game-title {
+            font-size: 48px;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .game-subtitle {
+            font-size: 20px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 40px;
+        }
+        .character {
+            font-size: 100px;
+            margin-bottom: 30px;
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes speakPulse {
+            0% { transform: scale(0.8); opacity: 0; }
+            20% { transform: scale(1.1); opacity: 1; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0; }
+        }
+        .start-btn {
+            padding: 18px 50px;
+            font-size: 22px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+            transition: all 0.3s;
+        }
+        .start-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(255,107,107,0.5);
+        }
+        .level-select {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 40px;
+        }
+        .level-btn {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 25px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .level-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        .level-btn.locked { opacity: 0.5; cursor: not-allowed; }
+
+        /* 连续答对奖励 */
+        .streak-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 1000;
+            animation: streakBounce 0.5s ease;
+            box-shadow: 0 4px 15px rgba(255,107,107,0.4);
+        }
+        @keyframes streakBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* 声调可视化 */
+        .tone-chart {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f5f7fa;
+            border-radius: 12px;
+        }
+        .tone-item {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tone-item:hover { transform: scale(1.1); }
+        .tone-1 { background: #ff6b6b20; color: #ff6b6b; }
+        .tone-2 { background: #4facfe20; color: #4facfe; }
+        .tone-3 { background: #43e97b20; color: #43e97b; }
+        .tone-4 { background: #ffc10720; color: #ffc107; }
+        .tone-item.active { transform: scale(1.15); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+
+        /* 关卡选择界面 */
+        .map-screen { padding: 20px; }
+        .map-title {
+            text-align: center;
+            font-size: 28px;
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .world-map {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .world-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .world-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(102,126,234,0.3);
+        }
+        .world-icon { font-size: 50px; margin-bottom: 10px; }
+        .world-name { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 5px; }
+        .world-progress { font-size: 14px; color: #666; }
+        .world-stars { font-size: 20px; margin-top: 10px; }
+
+        /* 关卡列表 */
+        .levels-list {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .level-item {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        .level-item:hover { transform: scale(1.08); }
+        .level-item.completed { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        .level-item.locked { background: #ccc; cursor: not-allowed; }
+        .level-item .stars { font-size: 12px; margin-top: 5px; }
+
+        /* 游戏界面 */
+        .game-screen {
+            background: rgba(255,255,255,0.98);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        .question-area {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #f5f7fa, #e4e8ec);
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+        .question-type {
+            font-size: 18px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .question-text {
+            font-size: 64px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            animation: textPulse 2s ease-in-out infinite;
+        }
+        @keyframes textPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .tone-visualizer {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 8px;
+            height: 30px;
+            margin: 15px 0;
+        }
+        .tone-bar {
+            width: 20px;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 4px 4px 0 0;
+            height: 10px;
+            transition: height 0.3s ease;
+        }
+        .tone-bar.active {
+            animation: toneAnim 0.8s ease-in-out infinite;
+        }
+        @keyframes toneAnim {
+            0%, 100% { height: 10px; }
+            50% { height: 30px; }
+        }
+        .tone-bar:nth-child(1).active { animation-delay: 0s; }
+        .tone-bar:nth-child(2).active { animation-delay: 0.2s; }
+        .tone-bar:nth-child(3).active { animation-delay: 0.4s; }
+        .tone-bar:nth-child(4).active { animation-delay: 0.6s; }
+        .question-hint {
+            font-size: 16px;
+            color: #666;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .option-btn {
+            padding: 25px;
+            font-size: 32px;
+            font-weight: bold;
+            background: white;
+            border: 3px solid #e4e8ec;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateY(-3px);
+        }
+        .option-btn.correct {
+            background: #43e97b;
+            border-color: #38f9d7;
+            color: white;
+            animation: pulse 0.5s;
+        }
+        .option-btn.wrong {
+            background: #ff6b6b;
+            border-color: #ff5252;
+            color: white;
+            animation: shake 0.5s;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .progress-bar {
+            height: 8px;
+            background: #e4e8ec;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+        .game-footer {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .footer-btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .pause-btn {
+            background: #f5f7fa;
+            border: 2px solid #ddd;
+            color: #666;
+        }
+        .sound-btn {
+            background: #667eea;
+            border: none;
+            color: white;
+        }
+
+        /* 结果界面 */
+        .result-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        .result-icon { font-size: 80px; margin-bottom: 20px; }
+        .result-title {
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .result-stars {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+        }
+        .result-stat {
+            text-align: center;
+        }
+        .result-stat .num {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .result-stat .label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .result-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .retry-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .retry-btn:hover { background: #5a6fd6; transform: translateY(-2px); }
+        .next-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .next-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(67,233,123,0.4); }
+        .back-home-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            background: #f5f7fa;
+            color: #666;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        /* 提示动画 */
+        .tip-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 12px;
+            font-size: 24px;
+            z-index: 1000;
+            animation: fadeInOut 1.5s forwards;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航 -->
+        <div class="game-header hidden" id="gameHeader">
+            <button class="back-btn" onclick="showMap()">← 返回</button>
+            <span class="level-info" id="levelInfo">L1-1</span>
+            <div class="stats">
+                <span class="stat-item">💗 <span id="lives">3</span></span>
+                <span class="stat-item">⭐ <span id="score">0</span></span>
+            </div>
+        </div>
+
+        <!-- 开始界面 -->
+        <div class="start-screen" id="startScreen">
+            <div class="character">🐼</div>
+            <h1 class="game-title">拼音大冒险</h1>
+            <p class="game-subtitle">从玩中学，轻松掌握汉语拼音</p>
+            <button class="start-btn" onclick="showMap()">开始冒险</button>
+            <div class="level-select">
+                <button class="level-btn" onclick="selectWorld(1)">🌈 单韵母</button>
+                <button class="level-btn" onclick="selectWorld(2)">🔤 声母</button>
+                <button class="level-btn" onclick="selectWorld(3)">🎯 辨析</button>
+                <button class="level-btn" onclick="selectWorld(4)">🎨 复韵母</button>
+                <button class="level-btn" onclick="selectWorld(5)">📖 拼读</button>
+                <button class="level-btn" onclick="selectWorld(6)">🎵 声调</button>
+                <button class="level-btn" onclick="selectWorld(7)">🏆 整体认读</button>
+            </div>
+        </div>
+
+        <!-- 世界选择界面 -->
+        <div class="map-screen hidden" id="mapScreen">
+            <h2 class="map-title">选择你的冒险世界</h2>
+            <div class="world-map" id="worldMap"></div>
+        </div>
+
+        <!-- 关卡列表界面 -->
+        <div class="map-screen hidden" id="levelScreen">
+            <h2 class="map-title" id="worldTitle">单韵母之旅</h2>
+            <div class="levels-list" id="levelsList"></div>
+            <button class="back-home-btn" style="margin: 30px auto; display: block;" onclick="showStart()">← 返回主页</button>
+        </div>
+
+        <!-- 游戏界面 -->
+        <div class="game-screen hidden" id="gameScreen">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+            <button class="question-area" onclick="speakCurrentQuestion()" style="cursor:pointer; border:none; background:transparent; width:100%; text-align:center;" title="点击听发音">
+                <div class="question-type" id="questionType">选择正确的读音</div>
+                <div class="question-text" id="questionText">ā</div>
+                <div class="question-hint" id="questionHint">点击正确答案</div>
+                <!-- 声调可视化 -->
+                <div class="tone-visualizer" id="toneVisualizer">
+                    <div class="tone-bar" id="toneBar1"></div>
+                    <div class="tone-bar" id="toneBar2"></div>
+                    <div class="tone-bar" id="toneBar3"></div>
+                    <div class="tone-bar" id="toneBar4"></div>
+                </div>
+            </div>
+            <div class="options-grid" id="optionsGrid"></div>
+            <div class="game-footer">
+                <button class="footer-btn pause-btn" onclick="pauseGame()">⏸️ 暂停</button>
+                <button class="footer-btn sound-btn" onclick="toggleSound()">🔊 音效</button>
+            </div>
+        </div>
+
+        <!-- 结果界面 -->
+        <div class="result-screen hidden" id="resultScreen">
+            <div class="result-icon" id="resultIcon">🎉</div>
+            <h2 class="result-title" id="resultTitle">太棒了！</h2>
+            <div class="result-stars" id="resultStars">⭐⭐⭐</div>
+            <div class="result-stats">
+                <div class="result-stat">
+                    <div class="num" id="correctCount">0</div>
+                    <div class="label">答对</div>
+                </div>
+                <div class="result-stat">
+                    <div class="num" id="wrongCount">0</div>
+                    <div class="label">答错</div>
+                </div>
+                <div class="result-stat">
+                    <div class="num" id="totalScore">0</div>
+                    <div class="label">得分</div>
+                </div>
+            </div>
+            <div class="result-buttons">
+                <button class="retry-btn" onclick="retryLevel()">🔄 再试一次</button>
+                <button class="next-btn" onclick="nextLevel()">下一关 →</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="lib/edge-tts.js"></script>
+    <script>
+        // ========== 初始化 Edge TTS ==========
+        const edgeTTS = new EdgeTTS();
+        edgeTTS.setVoice('zh-CN-XiaoxiaoNeural'); // 使用晓晓女声
+
+        // ========== 游戏数据 ==========
+        const WORLDS = [
+            { id: 1, name: '单韵母之旅', icon: '🌈', color: '#ff6b6b' },
+            { id: 2, name: '声母探索', icon: '🔤', color: '#4facfe' },
+            { id: 3, name: '声母辨析', icon: '🎯', color: '#a8edea' },
+            { id: 4, name: '复韵母王国', icon: '🎨', color: '#43e97b' },
+            { id: 5, name: '拼读大师', icon: '📖', color: '#f5576c' },
+            { id: 6, name: '声调城堡', icon: '🎵', color: '#ffc107' },
+            { id: 7, name: '整体认读', icon: '🏆', color: '#667eea' }
+        ];
+
+        // 关卡数据：每个关卡10道题
+        const LEVELS = {
+            // L1 单韵母
+            1: [
+                { q: 'a', opts: ['ā', 'á', 'ǎ', 'à'], a: 0, hint: '一声平平' },
+                { q: 'o', opts: ['ō', 'ó', 'ǒ', 'ò'], a: 0, hint: '一声平平' },
+                { q: 'e', opts: ['ē', 'é', 'ě', 'è'], a: 0, hint: '一声平平' },
+                { q: 'i', opts: ['ī', 'í', 'ǐ', 'ì'], a: 0, hint: '一声平平' },
+                { q: 'u', opts: ['ū', 'ú', 'ǔ', 'ù'], a: 0, hint: '一声平平' },
+                { q: 'ü', opts: ['ǖ', 'ǘ', 'ǚ', 'ǜ'], a: 0, hint: '一声平平' },
+                { q: 'á', opts: ['a', 'o', 'e', 'i'], a: 0, hint: '二声向上' },
+                { q: 'ì', opts: ['a', 'e', 'i', 'u'], a: 2, hint: '四声向下' },
+                { q: 'é', opts: ['e', 'a', 'o', 'i'], a: 0, hint: '二声向上' },
+                { q: 'ù', opts: ['u', 'a', 'o', 'i'], a: 0, hint: '四声向下' }
+            ],
+            2: [
+                { q: 'b', opts: ['b', 'd', 'p', 'q'], a: 0, hint: '右上圆' },
+                { q: 'p', opts: ['b', 'd', 'p', 'q'], a: 2, hint: '右下圆' },
+                { q: 'm', opts: ['m', 'n', 'f', 't'], a: 0, hint: '两个门洞' },
+                { q: 'f', opts: ['m', 'n', 'f', 't'], a: 2, hint: '像拐杖' },
+                { q: 'd', opts: ['b', 'd', 'p', 'q'], a: 1, hint: '左半圆' },
+                { q: 't', opts: ['m', 'n', 'f', 't'], a: 3, hint: '像伞柄' },
+                { q: 'n', opts: ['m', 'n', 'f', 't'], a: 1, hint: '一个门洞' },
+                { q: 'l', opts: ['l', 'i', 'r', 's'], a: 0, hint: '像棍子' },
+                { q: 'g', opts: ['g', 'k', 'h', 'j'], a: 0, hint: '像哥哥' },
+                { q: 'k', opts: ['g', 'k', 'h', 'j'], a: 1, hint: '像机枪' }
+            ],
+            3: [
+                { q: '哪个是b？', opts: ['d', 'b', 'p', 'q'], a: 1, hint: '右上圆' },
+                { q: '哪个是d？', opts: ['b', 'd', 'p', 'q'], a: 1, hint: '左半圆' },
+                { q: '哪个是p？', opts: ['b', 'd', 'p', 'q'], a: 2, hint: '右下圆' },
+                { q: '哪个是q？', opts: ['b', 'd', 'p', 'q'], a: 3, hint: '左下圆' },
+                { q: 'm有几个门洞？', opts: ['1', '2', '3', '0'], a: 1, hint: '两个门洞' },
+                { q: 'n有几个门洞？', opts: ['1', '2', '3', '0'], a: 0, hint: '一个门洞' },
+                { q: 'f像什么？', opts: ['拐杖', '棍子', '伞', '门'], a: 0, hint: '像拐杖' },
+                { q: 't像什么？', opts: ['拐杖', '棍子', '伞柄', '门'], a: 2, hint: '像伞柄' },
+                { q: 'l像什么？', opts: ['拐杖', '棍子', '伞柄', '门'], a: 1, hint: '像棍子' },
+                { q: 'g像什么？', opts: ['哥哥', '弟弟', '姐姐', '妹妹'], a: 0, hint: '像哥哥' }
+            ],
+            4: [
+                { q: 'ai', opts: ['ai', 'ei', 'ao', 'ou'], a: 0, hint: '爱' },
+                { q: 'ei', opts: ['ai', 'ei', 'ao', 'ou'], a: 1, hint: '诶' },
+                { q: 'ao', opts: ['ai', 'ei', 'ao', 'ou'], a: 2, hint: '奥' },
+                { q: 'ou', opts: ['ai', 'ei', 'ao', 'ou'], a: 3, hint: '欧' },
+                { q: 'iu', opts: ['iu', 'ui', 'ie', 'üe'], a: 0, hint: '优' },
+                { q: 'ui', opts: ['iu', 'ui', 'ie', 'üe'], a: 1, hint: '威' },
+                { q: 'ie', opts: ['ie', 'üe', 'er', 'ian'], a: 0, hint: '椰' },
+                { q: 'üe', opts: ['ie', 'üe', 'er', 'ian'], a: 1, hint: '约' },
+                { q: 'er', opts: ['ie', 'üe', 'er', 'ian'], a: 2, hint: '而' },
+                { q: 'an', opts: ['an', 'en', 'in', 'un'], a: 0, hint: '安' }
+            ],
+            5: [
+                { q: 'bā', opts: ['1', '2', '3', '4'], a: 1, hint: '爸' },
+                { q: 'mā', opts: ['1声', '2声', '3声', '4声'], a: 0, hint: '妈' },
+                { q: 'bà', opts: ['1声', '2声', '3声', '4声'], a: 3, hint: '爸' },
+                { q: 'mì', opts: ['1声', '2声', '3声', '4声'], a: 2, hint: '蜜' },
+                { q: 'dà', opts: ['1声', '2声', '3声', '4声'], a: 3, hint: '大' },
+                { q: 'lì', opts: ['1声', '2声', '3声', '4声'], a: 1, hint: '立' },
+                { q: 'gē', opts: ['1声', '2声', '3声', '4声'], a: 0, hint: '歌' },
+                { q: 'kè', opts: ['1声', '2声', '3声', '4声'], a: 3, hint: '课' },
+                { q: 'hē', opts: ['1声', '2声', '3声', '4声'], a: 0, hint: '喝' },
+                { q: 'jī', opts: ['1声', '2声', '3声', '4声'], a: 0, hint: '鸡' }
+            ],
+            6: [
+                { q: 'mā', opts: ['一声', '二声', '三声', '四声'], a: 0, hint: '妈' },
+                { q: 'yé', opts: ['一声', '二声', '三声', '四声'], a: 1, hint: '爷' },
+                { q: 'wǒ', opts: ['一声', '二声', '三声', '四声'], a: 2, hint: '我' },
+                { q: 'dà', opts: ['一声', '二声', '三声', '四声'], a: 3, hint: '大' },
+                { q: 'gē', opts: ['一声', '二声', '三声', '四声'], a: 0, hint: '哥' },
+                { q: 'hé', opts: ['一声', '二声', '三声', '四声'], a: 1, hint: '河' },
+                { q: 'mǎ', opts: ['一声', '二声', '三声', '四声'], a: 1, hint: '马' },
+                { q: 'mǐ', opts: ['一声', '二声', '三声', '四声'], a: 3, hint: '米' },
+                { q: 'nǔ', opts: ['一声', '二声', '三声', '四声'], a: 2, hint: '女' },
+                { q: 'lù', opts: ['一声', '二声', '三声', '四声'], a: 3, hint: '路' }
+            ],
+            7: [
+                { q: 'zhī', opts: ['zhi', 'chi', 'shi', 'ri'], a: 0, hint: '织' },
+                { q: 'chī', opts: ['zhi', 'chi', 'shi', 'ri'], a: 1, hint: '吃' },
+                { q: 'shī', opts: ['zhi', 'chi', 'shi', 'ri'], a: 2, hint: '师' },
+                { q: 'rì', opts: ['zhi', 'chi', 'shi', 'ri'], a: 3, hint: '日' },
+                { q: 'zì', opts: ['zi', 'ci', 'si', 'ri'], a: 0, hint: '字' },
+                { q: 'cí', opts: ['zi', 'ci', 'si', 'ri'], a: 1, hint: '词' },
+                { q: 'sī', opts: ['zi', 'ci', 'si', 'ri'], a: 2, hint: '思' },
+                { q: 'yī', opts: ['yi', 'wu', 'yu', 'ye'], a: 0, hint: '一' },
+                { q: 'wǔ', opts: ['yi', 'wu', 'yu', 'ye'], a: 1, hint: '五' },
+                { q: 'yǔ', opts: ['yi', 'wu', 'yu', 'ye'], a: 2, hint: '雨' }
+            ]
+        };
+
+        // ========== 游戏状态 ==========
+        let gameState = {
+            currentWorld: 1,
+            currentLevel: 1,
+            lives: 3,
+            score: 0,
+            questionIndex: 0,
+            correctCount: 0,
+            wrongCount: 0,
+            totalScore: 0,
+            progress: {}, // 存档 {worldId_levelId: stars}
+            streak: 0, // 连续答对
+            maxStreak: 0, // 最大连续答对
+            isSpeaking: false, // 是否正在朗读
+            onSpeakComplete: null // 朗读完成回调
+        };
+
+        // 加载存档
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem('pinyinGameProgress');
+                if (saved) gameState.progress = JSON.parse(saved);
+            } catch(e) {}
+        }
+
+        // 保存进度
+        function saveProgress() {
+            try {
+                localStorage.setItem('pinyinGameProgress', JSON.stringify(gameState.progress));
+            } catch(e) {}
+        }
+
+        // ========== 界面切换 ==========
+        function showScreen(screenId) {
+            ['startScreen', 'mapScreen', 'levelScreen', 'gameScreen', 'resultScreen'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(screenId).classList.remove('hidden');
+            document.getElementById('gameHeader').classList.toggle('hidden', screenId !== 'gameScreen');
+        }
+
+        function showStart() { showScreen('startScreen'); }
+        function showMap() { showMapScreen(); }
+
+        function showMapScreen() {
+            const map = document.getElementById('worldMap');
+            map.innerHTML = WORLDS.map(world => {
+                const totalLevels = LEVELS[world.id] ? LEVELS[world.id].length : 0;
+                const completed = Object.keys(gameState.progress).filter(k => k.startsWith(world.id + '_')).length;
+                const stars = Object.values(gameState.progress).filter(v => v > 0).length;
+                return `
+                    <div class="world-card" onclick="selectWorld(${world.id})">
+                        <div class="world-icon">${world.icon}</div>
+                        <div class="world-name">${world.name}</div>
+                        <div class="world-progress">${completed}/${totalLevels} 关卡</div>
+                        <div class="world-stars">${'⭐'.repeat(Math.min(stars, 3))}</div>
+                    </div>
+                `;
+            }).join('');
+            showScreen('mapScreen');
+        }
+
+        function selectWorld(worldId) {
+            gameState.currentWorld = worldId;
+            const world = WORLDS.find(w => w.id === worldId);
+            document.getElementById('worldTitle').textContent = world.name;
+
+            const levels = LEVELS[worldId] || [];
+            const levelsList = document.getElementById('levelsList');
+
+            // 计算已解锁关卡
+            let unlockedUpTo = 1;
+            for (let i = 1; i <= levels.length; i++) {
+                const key = `${worldId}_${i}`;
+                if (gameState.progress[key]) unlockedUpTo = i + 1;
+            }
+
+            levelsList.innerHTML = levels.map((_, i) => {
+                const levelNum = i + 1;
+                const key = `${worldId}_${levelNum}`;
+                const stars = gameState.progress[key] || 0;
+                const locked = levelNum > unlockedUpTo;
+                return `
+                    <div class="level-item ${stars > 0 ? 'completed' : ''} ${locked ? 'locked' : ''}"
+                         onclick="${locked ? '' : `startLevel(${worldId}, ${levelNum})`}">
+                        ${levelNum}
+                        <div class="stars">${'⭐'.repeat(stars)}</div>
+                    </div>
+                `;
+            }).join('');
+            showScreen('levelScreen');
+        }
+
+        // ========== 游戏逻辑 ==========
+        function startLevel(worldId, levelNum) {
+            gameState.currentWorld = worldId;
+            gameState.currentLevel = levelNum;
+            gameState.lives = 3;
+            gameState.score = 0;
+            gameState.questionIndex = 0;
+            gameState.correctCount = 0;
+            gameState.wrongCount = 0;
+
+            document.getElementById('levelInfo').textContent = `L${worldId}-${levelNum}`;
+            document.getElementById('lives').textContent = gameState.lives;
+            document.getElementById('score').textContent = gameState.score;
+
+            showScreen('gameScreen');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const levels = LEVELS[gameState.currentWorld] || [];
+            if (gameState.questionIndex >= levels.length) {
+                endLevel(); return;
+            }
+
+            const q = levels[gameState.questionIndex];
+            document.getElementById('questionType').textContent = `第 ${gameState.questionIndex + 1} / ${levels.length} 题`;
+            document.getElementById('questionText').textContent = q.q;
+            document.getElementById('questionHint').textContent = q.hint;
+            document.getElementById('progressFill').style.width = `${(gameState.questionIndex / levels.length) * 100}%`;
+
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = q.opts.map((opt, i) =>
+                `<button class="option-btn" onclick="selectOption(${i})">${opt}</button>`
+            ).join('');
+        }
+
+        function selectOption(optIndex) {
+            if (gameState.isSpeaking) return; // 防止重复点击
+            playClickSound();
+            const levels = LEVELS[gameState.currentWorld] || [];
+            const q = levels[gameState.questionIndex];
+            const btns = document.querySelectorAll('.option-btn');
+
+            if (optIndex === q.a) {
+                // 正确
+                playCorrectSound();
+                btns[optIndex].classList.add('correct');
+                gameState.correctCount++;
+                gameState.streak++;
+                if (gameState.streak > gameState.maxStreak) {
+                    gameState.maxStreak = gameState.streak;
+                }
+                // 连续答对加分奖励
+                if (gameState.streak >= 3) {
+                    gameState.score += 5;
+                    showStreakBonus(gameState.streak);
+                }
+                gameState.score += 10;
+                document.getElementById('score').textContent = gameState.score;
+            } else {
+                // 错误
+                playWrongSound();
+                btns[optIndex].classList.add('wrong');
+                btns[q.a].classList.add('correct');
+                gameState.wrongCount++;
+                gameState.streak = 0;
+                gameState.lives--;
+                document.getElementById('lives').textContent = gameState.lives;
+
+                if (gameState.lives <= 0) {
+                    playLoseSound();
+                    // 先朗读，再结束
+                    speakPinyin(q.q, () => endLevel());
+                    return;
+                }
+            }
+
+            // 朗读完成后切换下一题
+            speakPinyin(q.q, () => {
+                gameState.questionIndex++;
+                showQuestion();
+            });
+        }
+
+        // 显示连续答对奖励
+        function showStreakBonus(streak) {
+            const bonus = document.createElement('div');
+            bonus.className = 'streak-indicator';
+            bonus.textContent = streak >= 5 ? '🔥 太棒了！+' : '✨ 连续' + streak + '题！';
+            document.body.appendChild(bonus);
+            setTimeout(() => bonus.remove(), 1500);
+        }
+
+        function endLevel() {
+            const levels = LEVELS[gameState.currentWorld] || [];
+            const total = levels.length;
+            const passRate = gameState.correctCount / total;
+
+            let stars = 0;
+            if (passRate >= 0.9) stars = 3;
+            else if (passRate >= 0.7) stars = 2;
+            else if (passRate >= 0.5) stars = 1;
+
+            const key = `${gameState.currentWorld}_${gameState.currentLevel}`;
+            if (stars > (gameState.progress[key] || 0)) {
+                gameState.progress[key] = stars;
+            }
+            saveProgress();
+
+            // 显示结果
+            const passed = passRate >= 0.7;
+            if (passed) playWinSound(); else playLoseSound();
+            document.getElementById('resultIcon').textContent = passed ? '🎉' : '😢';
+            document.getElementById('resultTitle').textContent = passed ? '太棒了！' : '再接再厉';
+            document.getElementById('resultStars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+            document.getElementById('correctCount').textContent = gameState.correctCount;
+            document.getElementById('wrongCount').textContent = gameState.wrongCount;
+            document.getElementById('totalScore').textContent = gameState.score;
+
+            const nextBtn = document.querySelector('.next-btn');
+            nextBtn.style.display = (passed && gameState.currentLevel < (LEVELS[gameState.currentWorld]?.length || 0)) ? 'block' : 'none';
+
+            showScreen('resultScreen');
+        }
+
+        function retryLevel() {
+            startLevel(gameState.currentWorld, gameState.currentLevel);
+        }
+
+        function nextLevel() {
+            const nextLevelNum = gameState.currentLevel + 1;
+            const levels = LEVELS[gameState.currentWorld] || [];
+            if (nextLevelNum <= levels.length) {
+                startLevel(gameState.currentWorld, nextLevelNum);
+            } else {
+                selectWorld(gameState.currentWorld);
+            }
+        }
+
+        function pauseGame() {
+            alert('游戏暂停 - 继续努力！');
+        }
+
+        // ========== 音效系统 ==========
+        let audioContext = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playTone(freq, duration, type = 'sine', volume = 0.3) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = freq;
+                oscillator.type = type;
+                gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + duration);
+            } catch(e) {}
+        }
+
+        // 朗读拼音/汉字 - 使用 Edge TTS（高质量中文语音）
+        // callback: 朗读完成后的回调函数
+        async function speakPinyin(text, callback) {
+            if (!soundEnabled) {
+                if (callback) callback();
+                return;
+            }
+
+            // 映射：拼音符号 -> 对应汉字读音
+            const pinyinMap = {
+                // 整体认读音节（不带声调）
+                'zhi': '知', 'chi': '蚩', 'shi': '诗', 'ri': '日',
+                'zi': '字', 'ci': '词', 'si': '思',
+                'yi': '一', 'wu': '五', 'yu': '鱼', 'ye': '耶', 'yue': '月', 'yuan': '圆',
+                'yin': '音', 'yun': '云', 'ying': '鹰',
+                // 整体认读音节（带声调）- 关键！避免读成英文
+                'zhī': '知', 'zhí': '知', 'zhǐ': '知', 'zhì': '知',
+                'chī': '蚩', 'chí': '蚩', 'chǐ': '蚩', 'chì': '蚩',
+                'shī': '诗', 'shí': '诗', 'shǐ': '诗', 'shì': '是',
+                'rì': '日', 'rī': '日', 'rí': '日', 'rǐ': '日',
+                'zī': '字', 'zí': '字', 'zǐ': '字', 'zì': '自',
+                'cī': '词', 'cí': '词', 'cǐ': '此', 'cì': '次',
+                'sī': '思', 'sǐ': '死', 'sì': '四',
+                'yī': '一', 'yí': '移', 'yǐ': '以', 'yì': '意',
+                'wū': '屋', 'wú': '无', 'wǔ': '五', 'wù': '务',
+                'yú': '鱼', 'yǔ': '语', 'yù': '育', 'ye': '耶',
+                // 带声调的单韵母
+                'ā': '啊', 'á': '啊', 'ǎ': '啊', 'à': '啊',
+                'ō': '哦', 'ó': '哦', 'ǒ': '哦', 'ò': '哦',
+                'ē': '鹅', 'é': '鹅', 'ě': '鹅', 'è': '饿',
+                'ī': '衣', 'í': '疑', 'ǐ': '以', 'ì': '意',
+                'ū': '屋', 'ú': '无', 'ǔ': '五', 'ù': '务',
+                'ǖ': '鱼', 'ǘ': '鱼', 'ǚ': '鱼', 'ǜ': '鱼',
+                // 单元音
+                'a': '啊', 'o': '哦', 'e': '鹅', 'i': '衣', 'u': '屋', 'ü': '鱼',
+                // 声母
+                'b': '玻', 'p': '坡', 'm': '摸', 'f': '佛',
+                'd': '得', 't': '特', 'n': '讷', 'l': '勒',
+                'g': '哥', 'k': '科', 'h': '喝',
+                'j': '基', 'q': '七', 'x': '西', 'r': '日',
+                'zh': '知', 'ch': '蚩', 'sh': '诗',
+                'z': '资', 'c': '雌', 's': '思', 'y': '衣', 'w': '屋',
+                // 复韵母
+                'ai': '爱', 'ei': '诶', 'ao': '奥', 'ou': '欧', 'iu': '优', 'ui': '威',
+                'ie': '耶', 'üe': '约', 'er': '而',
+                'an': '安', 'en': '恩', 'in': '因', 'un': '温', 'ün': '晕',
+                'ang': '昂', 'eng': '鞥', 'ing': '英', 'ong': '翁',
+                // 声母+单韵母组合（带声调）
+                'bā': '八', 'bá': '拔', 'bǎ': '把', 'bà': '爸',
+                'pā': '趴', 'pá': '爬', 'pǎ': '怕', 'pà': '怕',
+                'mā': '妈', 'má': '麻', 'mǎ': '马', 'mà': '骂',
+                'dà': '大', 'dì': '弟', 'gē': '哥', 'kè': '课',
+                'hē': '喝', 'jī': '鸡', 'mǐ': '米', 'nǔ': '女'
+            };
+
+            // 转换拼音为汉字 - 优先精确匹配
+            let speakText = text;
+            if (pinyinMap[text]) {
+                speakText = pinyinMap[text];
+            } else {
+                // 按长度降序排列，优先匹配更长的字符串
+                const sortedKeys = Object.keys(pinyinMap).sort((a, b) => b.length - a.length);
+                for (const key of sortedKeys) {
+                    if (text === key) {
+                        speakText = pinyinMap[key];
+                        break;
+                    }
+                }
+                // 如果没找到，检查是否包含某个拼音
+                if (speakText === text) {
+                    for (const key of sortedKeys) {
+                        if (text.includes(key) && key.length >= 2) {
+                            speakText = pinyinMap[key];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            startToneAnimation();
+            showSpeakAnimation(speakText);
+
+            try {
+                // 使用 Edge TTS 朗读2遍
+                const speakCount = 2;
+                for (let i = 0; i < speakCount; i++) {
+                    const audioUrl = await edgeTTS.speak(speakText);
+                    const audio = new Audio(audioUrl);
+                    await new Promise((resolve, reject) => {
+                        audio.onended = resolve;
+                        audio.onerror = reject;
+                        audio.play();
+                    });
+                    if (i < speakCount - 1) {
+                        await new Promise(r => setTimeout(r, 800)); // 两遍之间停顿
+                    }
+                }
+            } catch(e) {
+                console.warn('Edge TTS failed, using fallback:', e);
+                // Fallback to Web Speech API
+                try {
+                    speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(speakText);
+                    utterance.lang = 'zh-CN';
+                    utterance.rate = 0.35;
+                    utterance.pitch = 1.15;
+                    const voices = speechSynthesis.getVoices().filter(v => v.lang.includes('zh'));
+                    if (voices.length > 0) utterance.voice = voices[0];
+                    speechSynthesis.speak(utterance);
+                    await new Promise(r => setTimeout(r, 2000));
+                } catch(e2) {
+                    console.error('Fallback also failed:', e2);
+                }
+            }
+
+            stopToneAnimation();
+            gameState.isSpeaking = false;
+            if (callback) callback();
+        }
+
+        // 开始声调动画
+        function startToneAnimation() {
+            const bars = document.querySelectorAll('.tone-bar');
+            bars.forEach(bar => bar.classList.add('active'));
+        }
+
+        // 停止声调动画
+        function stopToneAnimation() {
+            const bars = document.querySelectorAll('.tone-bar');
+            bars.forEach(bar => bar.classList.remove('active'));
+        }
+
+        // 显示朗读动画
+        function showSpeakAnimation(text) {
+            const el = document.getElementById('speakIndicator');
+            if (!el) {
+                const indicator = document.createElement('div');
+                indicator.id = 'speakIndicator';
+                indicator.style.cssText = `
+                    position: fixed; bottom: 20px; right: 20px;
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    color: white; padding: 12px 20px; border-radius: 25px;
+                    font-size: 18px; z-index: 1000;
+                    animation: speakPulse 1.5s ease-in-out;
+                    box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+                `;
+                document.body.appendChild(indicator);
+                setTimeout(() => indicator.remove(), 1500);
+            }
+            const indicator = document.getElementById('speakIndicator');
+            if (indicator) {
+                indicator.textContent = '🔊 ' + text;
+                indicator.style.animation = 'none';
+                indicator.offsetHeight; // 触发重绘
+                indicator.style.animation = 'speakPulse 1.5s ease-in-out';
+            }
+        }
+
+        function speakCurrentQuestion() {
+            const levels = LEVELS[gameState.currentWorld] || [];
+            const q = levels[gameState.questionIndex];
+            if (q) speakPinyin(q.q);
+        }
+
+        function playCorrectSound() {
+            // 正确：上升音调 "叮～"
+            playTone(523, 0.1, 'sine', 0.4); // C5
+            setTimeout(() => playTone(659, 0.1, 'sine', 0.4), 100); // E5
+            setTimeout(() => playTone(784, 0.15, 'sine', 0.4), 200); // G5
+        }
+
+        function playWrongSound() {
+            // 错误：下降音调 "呜呜～"
+            playTone(392, 0.15, 'sawtooth', 0.2); // G4
+            setTimeout(() => playTone(330, 0.25, 'sawtooth', 0.2), 150); // E4
+        }
+
+        function playClickSound() {
+            // 点击：短促 "滴"
+            playTone(800, 0.05, 'square', 0.15);
+        }
+
+        function playWinSound() {
+            // 胜利：欢快旋律 "🎉"
+            const notes = [523, 659, 784, 1047]; // C5 E5 G5 C6
+            notes.forEach((freq, i) => {
+                setTimeout(() => playTone(freq, 0.2, 'sine', 0.35), i * 150);
+            });
+        }
+
+        function playLoseSound() {
+            // 失败：低沉
+            playTone(196, 0.3, 'triangle', 0.3); // G3
+            setTimeout(() => playTone(165, 0.4, 'triangle', 0.3), 300); // E3
+        }
+
+        function playSound() {
+            // 测试音效
+            playTone(440, 0.2, 'sine', 0.3);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.querySelector('.sound-btn');
+            btn.textContent = soundEnabled ? '🔊 音效' : '🔇 静音';
+            btn.style.background = soundEnabled ? '#667eea' : '#999';
+        }
+
+        // ========== 初始化 ==========
+        loadProgress();
+        showStart();
+    </script>
+</body>
+</html>
