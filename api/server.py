@@ -232,17 +232,18 @@ def stream_video_from_cos(key):
     """从COS流式获取视频内容"""
     init_cos_client()
     if not cos_client:
-        return None
+        return None, None
     
     try:
         response = cos_client.get_object(
             Bucket=COS_BUCKET,
             Key=key,
         )
-        return response['Body']
+        content_length = response.get('Content-Length', 0)
+        return response['Body'], content_length
     except Exception as e:
         print(f"[ERROR] 从COS获取视频失败: {e}")
-        return None
+        return None, None
 
 
 @app.route('/api/proxy/video/<path:path>', methods=['GET'])
@@ -256,7 +257,7 @@ def proxy_video(path):
             'message': '无效的视频路径'
         }), 400
 
-    video_stream = stream_video_from_cos(key)
+    video_stream, content_length = stream_video_from_cos(key)
     if not video_stream:
         return jsonify({
             'code': 500,
@@ -279,7 +280,7 @@ def proxy_video(path):
         generate(),
         mimetype='video/mp4',
         headers={
-            'Content-Length': video_stream.total_size if hasattr(video_stream, 'total_size') else '',
+            'Content-Length': str(content_length) if content_length else '',
             'Accept-Ranges': 'bytes',
             'Cache-Control': 'no-cache'
         }
