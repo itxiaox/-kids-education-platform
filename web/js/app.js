@@ -220,6 +220,37 @@ function closePlayer() {
     currentPlaying = null;
 }
 
+// 打开数学游戏专区
+function openGameSection() {
+    const gameSection = document.getElementById('gameSection');
+    const playerSection = document.getElementById('playerSection');
+    
+    // 关闭视频播放器
+    if (playerSection) {
+        playerSection.style.display = 'none';
+        const videoPlayer = document.getElementById('videoPlayer');
+        if (videoPlayer) {
+            videoPlayer.pause();
+            videoPlayer.src = '';
+        }
+    }
+    
+    // 显示游戏专区
+    if (gameSection) {
+        gameSection.style.display = 'block';
+        // 滚动到游戏专区
+        gameSection.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// 关闭数学游戏专区
+function closeGameSection() {
+    const gameSection = document.getElementById('gameSection');
+    if (gameSection) {
+        gameSection.style.display = 'none';
+    }
+}
+
 // 搜索视频
 async function searchVideos() {
     const keyword = document.getElementById('searchInput').value.trim();

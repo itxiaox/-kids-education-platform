@@ -418,6 +418,35 @@ body {
     font-size: 0.8rem;
 }
 
+/* 数学游戏专区 */
+.game-section {
+    grid-column: 1 / -1;
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.game-header h2 {
+    color: #333;
+    font-size: 1.3rem;
+}
+
+.game-container {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f0f0f0;
+}
+
 /* 播放历史 */
 .history-section {
     background: white;
