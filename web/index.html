@@ -301,13 +301,10 @@
             <button class="cat-btn" data-category="science" onclick="switchCategory('science')">
                 🔬 科学
             </button>
-            <button class="cat-btn" data-category="game" onclick="openGameSection()">
-                🎮 数学游戏
-            </button>
-        </nav>
+                    </nav>
 
         <!-- 数学游戏专区 -->
-        <div class="game-section" id="gameSection" style="display: none;">
+        <div class="game-section" id="coolmathSection" style="display: none;">
             <div class="game-header">
                 <h2>🎮 Coolmath Kids 数学游戏</h2>
                 <button class="close-btn" onclick="closeGameSection()">×</button>
@@ -434,53 +431,94 @@
             <!-- ========== 动画游戏区域 ========== -->
             <div class="func-section" id="gameSection">
                 <h2 class="section-title">🎮 动画游戏 - 寓教于乐</h2>
-                <div class="game-grid">
-                    <div class="game-card" onclick="startGame('numberTreasure')">
-                        <div class="game-cover math">🔢</div>
-                        <div class="game-info">
-                            <h4>数字寻宝</h4>
-                            <p class="meta">数学 · 3-6岁 · 探险解谜</p>
-                            <span class="type">知识闯关</span>
+
+                <!-- 数学游戏子类 -->
+                <div class="game-subcategory">
+                    <h3 class="subcategory-title">📐 数学思维</h3>
+                    <div class="game-grid">
+                        <div class="game-card" onclick="startGame('numberTreasure')">
+                            <div class="game-cover math">🔢</div>
+                            <div class="game-info">
+                                <h4>数字寻宝</h4>
+                                <p class="meta">数学 · 3-6岁 · 探险解谜</p>
+                                <span class="type">知识闯关</span>
+                            </div>
+                        </div>
+                        <div class="game-card" onclick="window.open('https://www.coolmath4kids.com/', '_blank')">
+                            <div class="game-cover math">🧮</div>
+                            <div class="game-info">
+                                <h4>数字游戏</h4>
+                                <p class="meta">数学 · 4-12岁 · Coolmath Kids</p>
+                                <span class="type">趣味游戏</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="game-card" onclick="startGame('pinyinAdventure')">
-                        <div class="game-cover pinyin">🅰️</div>
-                        <div class="game-info">
-                            <h4>拼音大冒险</h4>
-                            <p class="meta">拼音 · 4-7岁 · 闯关模式</p>
-                            <span class="type">知识闯关</span>
+                </div>
+
+                <!-- 拼音游戏子类 -->
+                <div class="game-subcategory">
+                    <h3 class="subcategory-title">🅰️ 拼音学习</h3>
+                    <div class="game-grid">
+                        <div class="game-card" onclick="startGame('pinyinAdventure')">
+                            <div class="game-cover pinyin">🅰️</div>
+                            <div class="game-info">
+                                <h4>拼音大冒险</h4>
+                                <p class="meta">拼音 · 4-7岁 · 闯关模式</p>
+                                <span class="type">知识闯关</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="game-card" onclick="startGame('englishMatch')">
-                        <div class="game-cover english">🔤</div>
-                        <div class="game-info">
-                            <h4>英语连连看</h4>
-                            <p class="meta">英语 · 3-8岁 · 记忆配对</p>
-                            <span class="type">知识闯关</span>
+                </div>
+
+                <!-- 英语游戏子类 -->
+                <div class="game-subcategory">
+                    <h3 class="subcategory-title">🔤 英语启蒙</h3>
+                    <div class="game-grid">
+                        <div class="game-card" onclick="startGame('englishMatch')">
+                            <div class="game-cover english">🔤</div>
+                            <div class="game-info">
+                                <h4>英语连连看</h4>
+                                <p class="meta">英语 · 3-8岁 · 记忆配对</p>
+                                <span class="type">知识闯关</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="game-card" onclick="startGame('scienceLab')">
-                        <div class="game-cover science">🔬</div>
-                        <div class="game-info">
-                            <h4>科学实验室</h4>
-                            <p class="meta">科学 · 5-10岁 · 模拟实验</p>
-                            <span class="type">知识闯关</span>
+                </div>
+
+                <!-- 科学游戏子类 -->
+                <div class="game-subcategory">
+                    <h3 class="subcategory-title">🔬 科学探索</h3>
+                    <div class="game-grid">
+                        <div class="game-card" onclick="startGame('scienceLab')">
+                            <div class="game-cover science">🔬</div>
+                            <div class="game-info">
+                                <h4>科学实验室</h4>
+                                <p class="meta">科学 · 5-10岁 · 模拟实验</p>
+                                <span class="type">知识闯关</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="game-card" onclick="startGame('littlePainter')">
-                        <div class="game-cover art">🎨</div>
-                        <div class="game-info">
-                            <h4>小小画家</h4>
-                            <p class="meta">艺术 · 3-12岁 · 自由创作</p>
-                            <span class="type">创意创作</span>
+                </div>
+
+                <!-- 艺术游戏子类 -->
+                <div class="game-subcategory">
+                    <h3 class="subcategory-title">🎨 艺术创作</h3>
+                    <div class="game-grid">
+                        <div class="game-card" onclick="startGame('littlePainter')">
+                            <div class="game-cover art">🎨</div>
+                            <div class="game-info">
+                                <h4>小小画家</h4>
+                                <p class="meta">艺术 · 3-12岁 · 自由创作</p>
+                                <span class="type">创意创作</span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="game-card" onclick="startGame('blocklyCode')">
-                        <div class="game-cover code">🧩</div>
-                        <div class="game-info">
-                            <h4>积木编程</h4>
-                            <p class="meta">编程 · 6-12岁 · 可视化编程</p>
-                            <span class="type">创意创作</span>
+                        <div class="game-card" onclick="startGame('blocklyCode')">
+                            <div class="game-cover code">🧩</div>
+                            <div class="game-info">
+                                <h4>积木编程</h4>
+                                <p class="meta">编程 · 6-12岁 · 可视化编程</p>
+                                <span class="type">创意创作</span>
+                            </div>
                         </div>
                     </div>
                 </div>

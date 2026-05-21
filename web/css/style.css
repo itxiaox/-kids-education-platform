@@ -487,6 +487,84 @@ body {
     background: #ff5252;
 }
 
+/* 动画游戏区域 - 子分类布局 */
+.game-subcategory {
+    margin-bottom: 25px;
+}
+
+.game-subcategory:last-child {
+    margin-bottom: 0;
+}
+
+.subcategory-title {
+    font-size: 1.1rem;
+    color: #667eea;
+    margin-bottom: 15px;
+    padding-left: 5px;
+    border-left: 4px solid #667eea;
+}
+
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.game-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    padding: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.game-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.game-cover {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.game-cover.math { background: linear-gradient(135deg, #667eea, #764ba2); }
+.game-cover.pinyin { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.game-cover.english { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.game-cover.science { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.game-cover.art { background: linear-gradient(135deg, #fa709a, #fee140); }
+.game-cover.code { background: linear-gradient(135deg, #a8edea, #fed6e3); }
+
+.game-info h4 {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.game-info .meta {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.game-info .type {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border-radius: 10px;
+    font-size: 0.75rem;
+}
+
 .history-list {
     max-height: 500px;
     overflow-y: auto;
