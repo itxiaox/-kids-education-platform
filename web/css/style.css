@@ -1,4 +1,9 @@
-/* 全局样式 */
+/**
+ * 幼升小教育动画学习平台 - 响应式样式表
+ * 适配手机、平板、电脑、TV等不同分辨率
+ */
+
+/* ==================== 全局样式 ==================== */
 * {
     margin: 0;
     padding: 0;
@@ -22,7 +27,7 @@ body {
     padding: 15px;
 }
 
-/* 头部 */
+/* ==================== 头部样式 ==================== */
 .header {
     display: flex;
     justify-content: space-between;
@@ -32,10 +37,9 @@ body {
 }
 
 .header-right {
-    width: 40px; /* 占位，保持布局对称 */
+    width: 40px;
 }
 
-/* 设置菜单 */
 .settings-menu {
     position: relative;
     flex-shrink: 0;
@@ -62,7 +66,6 @@ body {
     transform: scale(1.1);
 }
 
-/* 下拉菜单 */
 .dropdown-menu {
     position: absolute;
     top: 56px;
@@ -80,19 +83,7 @@ body {
     display: block;
 }
 
-.dropdown-menu a {
-    display: block;
-    padding: 12px 20px;
-    color: #333;
-    text-decoration: none;
-    transition: background 0.3s;
-    font-size: 14px;
-}
-
-.dropdown-menu a:hover {
-    background: #f8f9fa;
-}
-
+.dropdown-menu a,
 .dropdown-menu .dropdown-btn {
     display: block;
     width: 100%;
@@ -104,13 +95,14 @@ body {
     cursor: pointer;
     transition: background 0.3s;
     font-size: 14px;
+    text-decoration: none;
 }
 
+.dropdown-menu a:hover,
 .dropdown-menu .dropdown-btn:hover {
     background: #f8f9fa;
 }
 
-/* 品牌区域 */
 .brand {
     text-align: center;
     flex: 1;
@@ -129,7 +121,7 @@ body {
     opacity: 0.9;
 }
 
-/* 搜索栏 */
+/* ==================== 搜索栏 ==================== */
 .search-bar {
     display: flex;
     gap: 10px;
@@ -170,7 +162,7 @@ body {
     box-shadow: 0 4px 15px rgba(255,107,107,0.4);
 }
 
-/* 统计栏 */
+/* ==================== 统计栏 ==================== */
 .stats-bar {
     display: flex;
     justify-content: center;
@@ -200,7 +192,7 @@ body {
     opacity: 0.9;
 }
 
-/* 分类导航 */
+/* ==================== 分类导航 ==================== */
 .category-nav {
     display: flex;
     justify-content: center;
@@ -229,37 +221,64 @@ body {
     color: white;
 }
 
-/* 主内容区 */
+/* ==================== 功能导航栏 (响应式重点) ==================== */
+.func-nav {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.func-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 24px;
+    background: rgba(255,255,255,0.15);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.func-btn:hover {
+    background: rgba(255,255,255,0.25);
+    transform: translateY(-2px);
+}
+
+.func-btn.active {
+    background: rgba(255,255,255,0.95);
+    color: #667eea;
+    border-color: #667eea;
+}
+
+.func-btn .icon {
+    font-size: 28px;
+}
+
+.func-btn .label {
+    font-weight: 600;
+}
+
+.func-btn .desc {
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+/* ==================== 主内容区 ==================== */
 .main-content {
     display: grid;
     grid-template-columns: 1fr 300px;
     gap: 20px;
     align-items: start;
-}
-
-/* 移动端主内容区优化 */
-@media (max-width: 1024px) {
-    .main-content {
-        grid-template-columns: 1fr 260px;
-        gap: 15px;
-    }
-}
-
-@media (max-width: 768px) {
-    .main-content {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-
-    .history-section {
-        order: -1;
-    }
-}
-
-@media (max-width: 480px) {
-    .main-content {
-        gap: 10px;
-    }
 }
 
 /* 播放器区域 */
@@ -311,7 +330,8 @@ body {
     max-height: 70vh;
     border-radius: 10px;
     background: #000;
-    aspect-ratio: 16/9;
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
 }
 
 .player-info {
@@ -411,6 +431,8 @@ body {
     justify-content: space-between;
     font-size: 0.85rem;
     color: #888;
+    flex-wrap: wrap;
+    gap: 5px;
 }
 
 .video-item .category-tag {
@@ -449,6 +471,15 @@ body {
     border-radius: 10px;
     overflow: hidden;
     background: #f0f0f0;
+    min-height: 400px;
+    max-height: 80vh;
+}
+
+.game-container iframe {
+    width: 100%;
+    height: 100%;
+    min-height: 400px;
+    max-height: 80vh;
 }
 
 /* 播放历史 */
@@ -471,98 +502,6 @@ body {
 
 .section-header h3 {
     font-size: 1.1rem;
-}
-
-.clear-btn {
-    padding: 5px 15px;
-    font-size: 0.85rem;
-    background: #ff6b6b;
-    color: white;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-}
-
-.clear-btn:hover {
-    background: #ff5252;
-}
-
-/* 动画游戏区域 - 子分类布局 */
-.game-subcategory {
-    margin-bottom: 25px;
-}
-
-.game-subcategory:last-child {
-    margin-bottom: 0;
-}
-
-.subcategory-title {
-    font-size: 1.1rem;
-    color: #667eea;
-    margin-bottom: 15px;
-    padding-left: 5px;
-    border-left: 4px solid #667eea;
-}
-
-.game-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 15px;
-}
-
-.game-card {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 15px;
-    padding: 15px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.game-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-}
-
-.game-cover {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
-}
-
-.game-cover.math { background: linear-gradient(135deg, #667eea, #764ba2); }
-.game-cover.pinyin { background: linear-gradient(135deg, #f093fb, #f5576c); }
-.game-cover.english { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-.game-cover.science { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-.game-cover.art { background: linear-gradient(135deg, #fa709a, #fee140); }
-.game-cover.code { background: linear-gradient(135deg, #a8edea, #fed6e3); }
-
-.game-info h4 {
-    font-size: 1rem;
-    color: #333;
-    margin-bottom: 5px;
-}
-
-.game-info .meta {
-    font-size: 0.8rem;
-    color: #888;
-    margin-bottom: 8px;
-}
-
-.game-info .type {
-    display: inline-block;
-    padding: 3px 10px;
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
-    border-radius: 10px;
-    font-size: 0.75rem;
 }
 
 .history-list {
@@ -616,6 +555,211 @@ body {
     color: #999;
 }
 
+/* ==================== 功能区域样式 ==================== */
+.func-section {
+    display: none;
+    padding: 20px 0;
+}
+
+.func-section.active {
+    display: block;
+}
+
+.section-title {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 16px;
+    padding-left: 12px;
+    border-left: 4px solid #667eea;
+}
+
+/* Wiki博客区域 */
+.wiki-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.wiki-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.wiki-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(102,126,234,0.2);
+}
+
+.wiki-card .icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+.wiki-card h3 {
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.wiki-card p {
+    color: #666;
+    font-size: 13px;
+}
+
+/* 知识库区域 */
+.knowledge-tree {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.knowledge-category {
+    margin-bottom: 20px;
+}
+
+.knowledge-category h4 {
+    color: #667eea;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.knowledge-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.knowledge-tag {
+    background: linear-gradient(135deg, #667eea20, #764ba220);
+    color: #667eea;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.knowledge-tag:hover {
+    background: linear-gradient(135deg, #667eea40, #764ba240);
+}
+
+/* 动画游戏区域 */
+.game-subcategory {
+    margin-bottom: 25px;
+}
+
+.game-subcategory:last-child {
+    margin-bottom: 0;
+}
+
+.subcategory-title {
+    font-size: 1.1rem;
+    color: #667eea;
+    margin-bottom: 15px;
+    padding-left: 5px;
+    border-left: 4px solid #667eea;
+}
+
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.game-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+}
+
+.game-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(102,126,234,0.2);
+}
+
+.game-cover {
+    height: 120px;
+    width: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    flex-shrink: 0;
+}
+
+.game-cover.math { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.game-cover.pinyin { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.game-cover.english { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.game-cover.science { background: linear-gradient(135deg, #fa709a, #fee140); }
+.game-cover.art { background: linear-gradient(135deg, #a8edea, #fed6e3); }
+.game-cover.code { background: linear-gradient(135deg, #667eea, #764ba2); }
+
+.game-info {
+    padding: 16px;
+    flex: 1;
+}
+
+.game-info h4 {
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.game-info .meta {
+    font-size: 12px;
+    color: #999;
+}
+
+.game-info .type {
+    display: inline-block;
+    background: #667eea20;
+    color: #667eea;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    margin-top: 8px;
+}
+
+/* 投稿入口 */
+.contribute-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px;
+    margin-top: 16px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.contribute-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+}
+
+/* 视频列表隐藏 */
+#videoListSection {
+    transition: opacity 0.3s;
+}
+
+#videoListSection.hidden {
+    display: none;
+}
+
 /* 底部 */
 .footer {
     text-align: center;
@@ -624,339 +768,7 @@ body {
     opacity: 0.9;
 }
 
-/* 搜索结果高亮 */
-.search-result {
-    background: #fff3cd;
-    padding: 2px 5px;
-    border-radius: 3px;
-}
-
-/* 平板端响应式 (768px - 1024px) */
-@media (max-width: 1024px) {
-    .main-content {
-        grid-template-columns: 1fr 250px;
-        gap: 15px;
-    }
-    
-    .header h1 {
-        font-size: 2.2rem;
-    }
-    
-    .stats-bar {
-        gap: 25px;
-    }
-    
-    .stat-item {
-        padding: 12px 22px;
-    }
-    
-    .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 15px;
-    }
-    
-    .video-item .video-thumb {
-        height: 130px;
-    }
-}
-
-/* 大屏手机响应式 (480px - 768px) */
-@media (max-width: 768px) {
-    html {
-        font-size: 15px;
-    }
-    
-    .container {
-        padding: 12px;
-    }
-    
-    .header {
-        padding: 20px 0;
-    }
-    
-    .header h1 {
-        font-size: 1.8rem;
-    }
-    
-    .subtitle {
-        font-size: 1rem;
-    }
-    
-    .main-content {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-    
-    .stats-bar {
-        gap: 12px;
-    }
-    
-    .stat-item {
-        padding: 10px 15px;
-        min-width: 80px;
-    }
-    
-    .stat-num {
-        font-size: 1.5rem;
-    }
-    
-    .stat-label {
-        font-size: 0.8rem;
-    }
-    
-    .cat-btn {
-        padding: 10px 20px;
-        font-size: 0.9rem;
-    }
-    
-    .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 12px;
-    }
-    
-    .video-item {
-        padding: 12px;
-    }
-    
-    .video-item .video-thumb {
-        aspect-ratio: 16 / 10;
-        font-size: 2.5rem;
-    }
-    
-    .player-section {
-        padding: 15px;
-    }
-    
-    .player-header h2 {
-        font-size: 1.1rem;
-    }
-    
-    .history-section {
-        order: -1;
-    }
-    
-    .history-list {
-        max-height: 300px;
-    }
-}
-
-/* 小屏手机响应式 (320px - 480px) */
-@media (max-width: 480px) {
-    html {
-        font-size: 14px;
-    }
-    
-    .container {
-        padding: 10px;
-    }
-    
-    .header {
-        padding: 15px 0;
-    }
-    
-    .header h1 {
-        font-size: 1.5rem;
-    }
-    
-    .subtitle {
-        font-size: 0.9rem;
-    }
-    
-    .search-bar {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .search-bar input {
-        padding: 12px 15px;
-        font-size: 0.95rem;
-    }
-    
-    .search-bar button {
-        padding: 12px 20px;
-        font-size: 0.95rem;
-    }
-    
-    .stats-bar {
-        gap: 8px;
-    }
-    
-    .stat-item {
-        padding: 8px 12px;
-        min-width: 70px;
-        border-radius: 10px;
-    }
-    
-    .stat-num {
-        font-size: 1.3rem;
-    }
-    
-    .stat-label {
-        font-size: 0.75rem;
-    }
-    
-    .cat-btn {
-        padding: 8px 16px;
-        font-size: 0.85rem;
-        border-radius: 20px;
-    }
-    
-    .video-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 10px;
-    }
-    
-    .video-item {
-        padding: 10px;
-        border-radius: 12px;
-    }
-    
-    .video-item .video-thumb {
-        aspect-ratio: 16 / 10;
-        font-size: 2rem;
-        border-radius: 8px;
-    }
-    
-    .video-item h3 {
-        font-size: 0.9rem;
-    }
-    
-    .video-item .meta {
-        font-size: 0.8rem;
-    }
-    
-    .player-section {
-        padding: 12px;
-        border-radius: 15px;
-    }
-    
-    #videoPlayer {
-        border-radius: 8px;
-        max-height: 50vh;
-    }
-    
-    .player-header h2 {
-        font-size: 1rem;
-    }
-    
-    .close-btn {
-        width: 35px;
-        height: 35px;
-        font-size: 1.3rem;
-    }
-    
-    .player-info {
-        font-size: 0.85rem;
-        padding: 8px;
-    }
-    
-    .history-section {
-        padding: 15px;
-        border-radius: 15px;
-    }
-    
-    .history-item {
-        padding: 10px;
-    }
-    
-    .history-item .history-icon {
-        font-size: 1.3rem;
-    }
-    
-    .history-item .history-name {
-        font-size: 0.85rem;
-    }
-    
-    .footer {
-        padding: 20px 0;
-        font-size: 0.9rem;
-    }
-}
-
-/* 超小屏响应式 (< 320px) */
-@media (max-width: 320px) {
-    .video-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .video-item .video-thumb {
-        height: 120px;
-    }
-    
-    .stats-bar {
-        justify-content: space-around;
-    }
-    
-    .stat-item {
-        min-width: 60px;
-        padding: 6px 8px;
-    }
-}
-
-/* 横屏模式优化 */
-@media (max-height: 500px) and (orientation: landscape) {
-    .header {
-        padding: 10px 0;
-    }
-    
-    .header h1 {
-        font-size: 1.3rem;
-    }
-    
-    .subtitle {
-        display: none;
-    }
-    
-    .stats-bar {
-        margin-bottom: 15px;
-    }
-    
-    #videoPlayer {
-        max-height: 45vh;
-    }
-}
-
-/* 滚动条美化 */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #999;
-}
-
-/* 触摸优化 */
-.cat-btn,
-.video-item,
-.history-item,
-.search-bar button,
-.close-btn,
-.clear-btn {
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* 焦点样式 */
-.search-bar input:focus,
-.cat-btn:focus,
-.close-btn:focus,
-.clear-btn:focus {
-    outline: 2px solid #667eea;
-    outline-offset: 2px;
-}
-
-/* 弹窗遮罩 */
+/* 弹窗样式 */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -1078,419 +890,735 @@ body {
     accent-color: #667eea;
 }
 
-/* ==================== 完整响应式设计 - 适配手机、平板、电脑、TV ==================== */
+/* ==================== 响应式设计 - 适配所有设备 ==================== */
 
-/* 基础响应式设置 */
-html {
-    /* 基础字体大小缩放，适合TV等大屏 */
-    font-size: 16px;
+/* 超大屏 TV (>=1920px) */
+@media (min-width: 1920px) {
+    html {
+        font-size: 18px;
+    }
+
+    .container {
+        max-width: 1800px;
+        padding: 25px;
+    }
+
+    .header {
+        padding: 25px 0;
+    }
+
+    .brand h1 {
+        font-size: 2.2rem;
+    }
+
+    .brand .subtitle {
+        font-size: 1.1rem;
+    }
+
+    .func-nav {
+        padding: 20px;
+        gap: 16px;
+    }
+
+    .func-btn {
+        padding: 18px 30px;
+        min-width: 120px;
+    }
+
+    .func-btn .icon {
+        font-size: 36px;
+    }
+
+    .search-bar {
+        max-width: 800px;
+    }
+
+    .search-bar input {
+        max-width: 650px;
+        padding: 18px 25px;
+    }
+
+    .search-bar button {
+        padding: 18px 35px;
+    }
+
+    .stats-bar {
+        gap: 50px;
+    }
+
+    .stat-item {
+        padding: 20px 40px;
+        min-width: 130px;
+    }
+
+    .stat-num {
+        font-size: 2.2rem;
+    }
+
+    .video-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 24px;
+    }
+
+    .wiki-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+    }
+
+    .game-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    .game-cover {
+        height: 140px;
+        width: 140px;
+        font-size: 56px;
+    }
+
+    .modal-content {
+        max-width: 500px;
+    }
 }
 
-/* 超小屏手机 (<480px) */
+/* 大屏电脑 (1400px - 1919px) */
+@media (min-width: 1400px) and (max-width: 1919px) {
+    .container {
+        max-width: 1600px;
+    }
+
+    .video-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .wiki-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* 普通电脑 (1024px - 1399px) */
+@media (min-width: 1024px) and (max-width: 1399px) {
+    .video-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+    }
+
+    .main-content {
+        grid-template-columns: 1fr 280px;
+    }
+}
+
+/* 平板端 (768px - 1023px) */
+@media (max-width: 1023px) {
+    .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .header h1 {
+        font-size: 1.8rem;
+    }
+
+    .stats-bar {
+        gap: 25px;
+    }
+
+    .stat-item {
+        padding: 12px 22px;
+    }
+
+    .video-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .video-item .video-thumb {
+        font-size: 2.5rem;
+    }
+
+    .func-nav {
+        padding: 14px;
+        gap: 10px;
+    }
+
+    .func-btn {
+        padding: 12px 20px;
+        min-width: 90px;
+    }
+
+    .func-btn .icon {
+        font-size: 24px;
+    }
+
+    .func-btn .desc {
+        display: none;
+    }
+
+    .wiki-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .game-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 大屏手机 (480px - 767px) */
+@media (max-width: 767px) {
+    html {
+        font-size: 15px;
+    }
+
+    .container {
+        padding: 12px;
+    }
+
+    .header {
+        padding: 15px 0;
+    }
+
+    .header h1 {
+        font-size: 1.6rem;
+    }
+
+    .main-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .history-section {
+        order: -1;
+    }
+
+    .stats-bar {
+        gap: 12px;
+    }
+
+    .stat-item {
+        padding: 10px 15px;
+        min-width: 80px;
+    }
+
+    .stat-num {
+        font-size: 1.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.8rem;
+    }
+
+    .cat-btn {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+    }
+
+    .video-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+        gap: 12px;
+    }
+
+    .video-item {
+        padding: 12px;
+    }
+
+    .video-item .video-thumb {
+        font-size: 2.2rem;
+    }
+
+    .video-item h3 {
+        font-size: 0.9rem;
+    }
+
+    .func-nav {
+        gap: 8px;
+        padding: 12px;
+    }
+
+    .func-btn {
+        padding: 10px 16px;
+        min-width: 80px;
+        font-size: 12px;
+    }
+
+    .func-btn .icon {
+        font-size: 22px;
+    }
+
+    .func-btn .label {
+        font-size: 13px;
+    }
+
+    .func-btn .desc {
+        display: none;
+    }
+
+    .wiki-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .wiki-card {
+        padding: 15px;
+    }
+
+    .wiki-card .icon {
+        font-size: 32px;
+    }
+
+    .game-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .game-card {
+        flex-direction: row;
+    }
+
+    .game-cover {
+        width: 80px;
+        height: 80px;
+        font-size: 36px;
+    }
+
+    .player-section {
+        padding: 15px;
+    }
+
+    .player-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .history-section {
+        padding: 15px;
+    }
+
+    .history-list {
+        max-height: 300px;
+    }
+
+    .search-bar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .search-bar input {
+        flex: 1;
+        min-width: 200px;
+        max-width: none;
+    }
+
+    .search-bar button {
+        padding: 12px 20px;
+    }
+
+    .knowledge-list {
+        gap: 6px;
+    }
+
+    .knowledge-tag {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}
+
+/* 小屏手机 (320px - 479px) */
 @media (max-width: 479px) {
     html {
         font-size: 14px;
     }
-    
+
     .container {
         padding: 8px;
     }
-    
-    /* 头部 */
+
     .header {
-        padding: 12px 5px;
+        padding: 12px 0;
     }
-    
+
     .settings-btn {
         width: 36px;
         height: 36px;
         font-size: 16px;
     }
-    
+
     .header-right {
         width: 36px;
     }
-    
+
     .brand h1 {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
     }
-    
+
     .brand .subtitle {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
-    
-    /* 搜索栏 */
-    .search-bar {
-        flex-direction: column;
-        gap: 10px;
-        padding: 0 5px;
-    }
-    
-    .search-bar input {
-        padding: 12px 14px;
-        font-size: 0.95rem;
-    }
-    
-    .search-bar button {
-        width: 100%;
-        padding: 12px;
-    }
-    
-    /* 统计栏 */
+
     .stats-bar {
-        gap: 10px;
-        padding: 0 5px;
+        gap: 8px;
     }
-    
+
     .stat-item {
-        padding: 10px 14px;
-        min-width: auto;
+        padding: 8px 12px;
+        min-width: 70px;
+        border-radius: 10px;
     }
-    
-    /* 分类标签 */
-    .category-tabs {
-        gap: 6px;
-        padding: 0 5px;
-        flex-wrap: wrap;
+
+    .stat-num {
+        font-size: 1.3rem;
     }
-    
-    .category-tab {
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+
+    .cat-btn {
         padding: 8px 14px;
         font-size: 0.85rem;
+        border-radius: 18px;
     }
-    
-    /* 视频网格 */
+
     .video-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        padding: 0 5px;
+        gap: 8px;
     }
-    
-    .video-card {
+
+    .video-item {
         padding: 8px;
         border-radius: 10px;
     }
-    
-    .video-thumbnail {
+
+    .video-item .video-thumb {
         font-size: 2rem;
-        padding: 20px 8px;
+        border-radius: 8px;
     }
-    
-    .video-info h4 {
+
+    .video-item h3 {
         font-size: 0.85rem;
     }
-    
-    /* 播放历史 */
-    .history-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
+
+    .video-item .meta {
+        font-size: 0.75rem;
     }
-    
-    .history-thumbnail {
-        font-size: 2rem;
+
+    .search-bar {
+        flex-direction: row;
+        gap: 6px;
+        padding: 0 5px;
+    }
+
+    .search-bar input {
+        flex: 1;
+        min-width: 0;
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+
+    .search-bar button {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+
+    .func-nav {
+        padding: 10px 8px;
+        gap: 6px;
+    }
+
+    .func-btn {
+        padding: 8px 12px;
+        min-width: 70px;
+        font-size: 11px;
+    }
+
+    .func-btn .icon {
+        font-size: 20px;
+    }
+
+    .func-btn .label {
+        font-size: 12px;
+    }
+
+    .func-btn .desc {
+        display: none;
+    }
+
+    .wiki-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .wiki-card {
+        padding: 12px;
+    }
+
+    .wiki-card .icon {
+        font-size: 28px;
+    }
+
+    .wiki-card h3 {
+        font-size: 0.95rem;
+    }
+
+    .wiki-card p {
+        font-size: 12px;
+    }
+
+    .game-grid {
+        gap: 10px;
+    }
+
+    .game-card {
+        padding: 12px;
+    }
+
+    .game-cover {
         width: 60px;
         height: 60px;
+        font-size: 28px;
     }
-    
-    .history-info {
-        flex: 1;
+
+    .game-info {
+        padding: 10px;
     }
-    
-    .history-meta {
+
+    .game-info h4 {
+        font-size: 0.9rem;
+    }
+
+    .game-info .meta {
+        font-size: 11px;
+    }
+
+    .player-section {
+        padding: 10px;
+        border-radius: 15px;
+    }
+
+    #videoPlayer {
+        max-height: 50vh;
+    }
+
+    .player-header h2 {
+        font-size: 0.95rem;
+    }
+
+    .close-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1.2rem;
+    }
+
+    .player-info {
+        font-size: 0.8rem;
+        padding: 8px;
+    }
+
+    .history-section {
+        padding: 12px;
+        border-radius: 15px;
+    }
+
+    .history-item {
+        padding: 8px;
+    }
+
+    .history-item .history-icon {
+        font-size: 1.2rem;
+    }
+
+    .history-item .history-name {
         font-size: 0.85rem;
     }
-    
-    /* 弹窗 */
+
+    .footer {
+        padding: 20px 0;
+        font-size: 0.85rem;
+    }
+
     .modal-content {
         width: 95%;
         max-width: 340px;
     }
-    
+
     .modal-header {
-        padding: 12px 16px;
+        padding: 15px 20px;
     }
-    
+
     .modal-header h2 {
         font-size: 1.1rem;
     }
-    
+
     .modal-body {
         padding: 16px;
     }
-    
+
     .form-group input {
         padding: 10px 12px;
     }
-    
+
     .login-submit-btn {
         padding: 12px;
     }
-    
-    /* 设置按钮 */
-    .settings-btn {
-        padding: 8px 14px;
-        font-size: 0.9rem;
-    }
-    
-    .dropdown-menu {
-        min-width: 140px;
-    }
-    
-    .dropdown-menu a,
-    .dropdown-menu .dropdown-btn {
-        padding: 10px 14px;
-        font-size: 0.9rem;
-    }
-}
 
-/* 小屏手机 (480px - 767px) */
-@media (min-width: 480px) and (max-width: 767px) {
-    html {
-        font-size: 15px;
-    }
-    
-    .container {
-        padding: 12px;
-    }
-    
-    /* 头部 */
-    .header h1 {
-        font-size: 1.6rem;
-    }
-    
-    /* 搜索栏 */
-    .search-bar input {
-        max-width: 350px;
-    }
-    
-    /* 统计栏 */
-    .stats-bar {
-        gap: 20px;
-    }
-    
-    /* 视频网格 */
-    .video-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-    }
-    
-    /* 分类标签 */
-    .category-tabs {
-        gap: 10px;
-    }
-    
-    .category-tab {
-        padding: 12px 18px;
-    }
-}
-
-/* 平板 (768px - 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
-    html {
-        font-size: 16px;
-    }
-    
-    .container {
-        padding: 15px;
-    }
-    
-    /* 头部 */
-    .header h1 {
-        font-size: 2rem;
-    }
-    
-    /* 搜索栏 */
-    .search-bar input {
-        max-width: 420px;
-    }
-    
-    /* 视频网格 */
-    .video-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 18px;
-    }
-}
-
-/* 小型电脑 (1024px - 1399px) */
-@media (min-width: 1024px) and (max-width: 1399px) {
-    html {
-        font-size: 16px;
-    }
-    
-    /* 视频网格 */
-    .video-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-/* 标准电脑 (1400px - 1919px) */
-@media (min-width: 1400px) and (max-width: 1919px) {
-    html {
-        font-size: 16px;
-    }
-    
-    .container {
-        max-width: 1600px;
-    }
-    
-    /* 视频网格 */
-    .video-grid {
-        grid-template-columns: repeat(5, 1fr);
-        gap: 22px;
-    }
-    
-    .video-card {
-        padding: 15px;
-    }
-}
-
-/* 大屏幕/TV (>=1920px) */
-@media (min-width: 1920px) {
-    html {
+    .section-title {
         font-size: 18px;
     }
-    
-    .container {
-        max-width: 1920px;
-        padding: 25px;
-    }
-    
-    /* 头部 */
-    .header {
-        padding: 35px 0;
-    }
-    
-    .header h1 {
-        font-size: 3rem;
-    }
-    
-    .subtitle {
-        font-size: 1.3rem;
-    }
-    
-    /* 搜索栏 */
-    .search-bar input {
-        max-width: 600px;
-        padding: 18px 25px;
-        font-size: 1.1rem;
-    }
-    
-    .search-bar button {
-        padding: 18px 40px;
-        font-size: 1.1rem;
-    }
-    
-    /* 统计栏 */
-    .stats-bar {
-        gap: 50px;
-    }
-    
-    .stat-item {
-        padding: 20px 45px;
-        min-width: 140px;
-    }
-    
-    /* 分类标签 */
-    .category-tabs {
-        gap: 15px;
-    }
-    
-    .category-tab {
-        padding: 16px 28px;
-        font-size: 1.1rem;
-    }
-    
-    /* 视频网格 */
-    .video-grid {
-        grid-template-columns: repeat(6, 1fr);
-        gap: 25px;
-    }
-    
-    .video-card {
-        padding: 20px;
-        border-radius: 20px;
-    }
-    
-    .video-thumbnail {
-        font-size: 4rem;
-        padding: 40px 20px;
-    }
-    
-    .video-info h4 {
-        font-size: 1.1rem;
-    }
-    
-    /* 弹窗 */
-    .modal-content {
-        max-width: 520px;
-    }
-    
-    .modal-header {
-        padding: 25px 30px;
-    }
-    
-    .modal-body {
-        padding: 35px;
-    }
-    
-    /* 按钮 */
-    .settings-btn {
-        padding: 14px 24px;
-        font-size: 1.1rem;
-    }
-    
-    .login-btn {
-        padding: 14px 32px;
-        font-size: 1.1rem;
+
+    .subcategory-title {
+        font-size: 1rem;
     }
 }
 
-/* 超宽屏/巨屏TV (>=2560px) */
-@media (min-width: 2560px) {
-    html {
-        font-size: 20px;
-    }
-    
-    .container {
-        max-width: 2400px;
-        padding: 35px;
-    }
-    
-    /* 视频网格 */
-    .video-grid {
-        grid-template-columns: repeat(8, 1fr);
-        gap: 30px;
-    }
-    
-    .video-card {
-        padding: 25px;
-    }
-    
-    .video-thumbnail {
-        font-size: 4.5rem;
-        padding: 50px 25px;
-    }
-}
-
-/* 横竖屏适配 */
-@media (orientation: portrait) {
-    /* 竖屏时调整视频网格列数 */
+/* 超小屏 (< 320px) */
+@media (max-width: 319px) {
     .video-grid {
         grid-template-columns: repeat(2, 1fr);
     }
-    
-    @media (min-width: 768px) and (orientation: portrait) {
-        .video-grid {
-            grid-template-columns: repeat(3, 1fr);
-        }
+
+    .video-item .video-thumb {
+        aspect-ratio: 16 / 10;
+        height: auto;
     }
-    
-    @media (min-width: 1024px) and (orientation: portrait) {
-        .video-grid {
-            grid-template-columns: repeat(4, 1fr);
-        }
+
+    .stats-bar {
+        justify-content: space-around;
     }
+
+    .stat-item {
+        min-width: 60px;
+        padding: 6px 8px;
+    }
+
+    .func-nav {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .func-btn {
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 12px;
+        padding: 12px 16px;
+    }
+
+    .func-btn .icon {
+        font-size: 24px;
+    }
+
+    .func-btn .desc {
+        display: block;
+        font-size: 11px;
+    }
+}
+
+/* 横屏模式优化 */
+@media (max-height: 500px) and (orientation: landscape) {
+    .header {
+        padding: 10px 0;
+    }
+
+    .header h1 {
+        font-size: 1.3rem;
+    }
+
+    .subtitle {
+        display: none;
+    }
+
+    .stats-bar {
+        margin-bottom: 15px;
+    }
+
+    #videoPlayer {
+        max-height: 45vh;
+    }
+
+    .func-nav {
+        padding: 10px;
+        gap: 8px;
+    }
+
+    .func-btn {
+        padding: 8px 16px;
+        min-width: 80px;
+    }
+
+    .func-btn .icon {
+        font-size: 22px;
+    }
+
+    .func-btn .desc {
+        display: none;
+    }
+}
+
+/* 竖屏平板优化 */
+@media (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
+    .video-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .game-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+    .cat-btn,
+    .video-item,
+    .history-item,
+    .search-bar button,
+    .close-btn,
+    .func-btn,
+    .wiki-card,
+    .game-card,
+    .knowledge-tag {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .func-btn:active,
+    .cat-btn:active,
+    .video-item:active {
+        opacity: 0.8;
+        transform: scale(0.98);
+    }
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* 焦点样式 */
+.search-bar input:focus,
+.cat-btn:focus,
+.close-btn:focus,
+.func-btn:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
 }
 
 /* 打印模式 */
@@ -1498,10 +1626,37 @@ html {
     body {
         background: white;
     }
-    
+
     .search-bar,
-    .category-tabs,
-    .history-section {
+    .category-nav,
+    .history-section,
+    .func-nav {
         display: none !important;
+    }
+}
+
+/* 减少动画 (无障碍) */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+    .cat-btn {
+        border: 2px solid #333;
+    }
+
+    .func-btn {
+        border: 2px solid white;
+    }
+
+    .video-item {
+        border: 1px solid #333;
     }
 }
