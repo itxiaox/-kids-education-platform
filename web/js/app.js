@@ -408,6 +408,22 @@ function formatSize(bytes) {
 
 // 显示登录弹窗
 function showLoginModal() {
+    // 自动填充记住的账号
+    const savedUsername = localStorage.getItem('remembered_username');
+    if (savedUsername) {
+        document.getElementById('username').value = savedUsername;
+        document.getElementById('rememberMe').checked = true;
+    }
+
+    // 检查自动登录
+    const autoLoginToken = localStorage.getItem('auto_login_token');
+    if (autoLoginToken) {
+        // 使用自动登录token直接登录
+        localStorage.setItem('admin_token', autoLoginToken);
+        window.location.href = '/admin.html';
+        return;
+    }
+
     document.getElementById('loginModal').style.display = 'flex';
 }
 
@@ -422,22 +438,38 @@ function closeLoginModal() {
 async function handleLogin() {
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value.trim();
-    
+    const rememberMe = document.getElementById('rememberMe').checked;
+    const autoLogin = document.getElementById('autoLogin').checked;
+
     if (!username || !password) {
         showError('请输入用户名和密码');
         return;
     }
-    
+
     try {
         const response = await fetch(`${API_BASE}/api/admin/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
         });
-        
+
         const result = await response.json();
-        
+
         if (result.code === 0) {
+            // 处理记住账号
+            if (rememberMe) {
+                localStorage.setItem('remembered_username', username);
+            } else {
+                localStorage.removeItem('remembered_username');
+            }
+
+            // 处理自动登录
+            if (autoLogin) {
+                localStorage.setItem('auto_login_token', result.data.token);
+            } else {
+                localStorage.removeItem('auto_login_token');
+            }
+
             localStorage.setItem('admin_token', result.data.token);
             closeLoginModal();
             window.location.href = '/admin.html';

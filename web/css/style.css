@@ -1062,6 +1062,22 @@ body {
     margin-top: 15px;
 }
 
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #667eea;
+}
+
 /* ==================== 完整响应式设计 - 适配手机、平板、电脑、TV ==================== */
 
 /* 基础响应式设置 */
